@@ -42,83 +42,118 @@
 
 ```mermaid
 flowchart TD
-    %% Define Styles
-    classDef moduleStyle fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#93c5fd,font-weight:bold;
-    classDef entityStyle fill:#1e293b,stroke:#475569,stroke-width:1.5px,color:#cbd5e1;
+    %% إعدادات الخطوط الافتراضية لتكبير وتوضيح كافة العناصر
+    classDef default font-size:16px,font-family:sans-serif,font-weight:bold;
+
+    %% تعريف الأنماط بألوان عالية التباين ومريحة للعين
+    %% CRM
+    classDef crmMod fill:#1E88E5,stroke:#0D47A1,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
+    classDef crmEnt fill:#BBDEFB,stroke:#1E88E5,stroke-width:2px,color:#000000,rx:5,ry:5;
+    
+    %% Tickets
+    classDef tickMod fill:#8E24AA,stroke:#4A148C,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
+    classDef tickEnt fill:#E1BEE7,stroke:#8E24AA,stroke-width:2px,color:#000000,rx:5,ry:5;
+    
+    %% Lab
+    classDef labMod fill:#43A047,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
+    classDef labEnt fill:#C8E6C9,stroke:#43A047,stroke-width:2px,color:#000000,rx:5,ry:5;
+    
+    %% HR
+    classDef hrMod fill:#00ACC1,stroke:#006064,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
+    classDef hrEnt fill:#B2EBF2,stroke:#00ACC1,stroke-width:2px,color:#000000,rx:5,ry:5;
+    
+    %% Assets
+    classDef assetMod fill:#F4511E,stroke:#BF360C,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
+    classDef assetEnt fill:#FFCCBC,stroke:#F4511E,stroke-width:2px,color:#000000,rx:5,ry:5;
+    
+    %% Calibration
+    classDef calMod fill:#FDD835,stroke:#F57F17,stroke-width:2px,color:#000000,rx:8,ry:8;
+    classDef calEnt fill:#FFF9C4,stroke:#FDD835,stroke-width:2px,color:#000000,rx:5,ry:5;
+    
+    %% Finance
+    classDef finMod fill:#E53935,stroke:#B71C1C,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
+    classDef finEnt fill:#FFCDD2,stroke:#E53935,stroke-width:2px,color:#000000,rx:5,ry:5;
 
     subgraph CRM ["موديول علاقات العملاء CRM"]
-        CRM_M["إدارة جهات الاتصال والمبيعات"]:::moduleStyle
-        E_Cust["Customer\n(العميل)"]:::entityStyle
-        E_Lead["Lead\n(الفرصة البيعية)"]:::entityStyle
-        E_Quote["Quotation\n(عرض السعر)"]:::entityStyle
+        CRM_M["إدارة جهات الاتصال والمبيعات"]:::crmMod
+        E_Cust["Customer\n(العميل)"]:::crmEnt
+        E_Lead["Lead\n(الفرصة البيعية)"]:::crmEnt
+        E_Quote["Quotation\n(عرض السعر)"]:::crmEnt
         CRM_M --- E_Cust & E_Lead & E_Quote
     end
 
     subgraph Tickets ["موديول التذاكر وبوابات الويب"]
-        Tick_M["إدارة المعاملات والدعم"]:::moduleStyle
-        E_Ticket["TransactionTicket\n(تذكرة المعاملة)"]:::entityStyle
-        E_CTicket["ClientTicket\n(تذكرة الطلبات)"]:::entityStyle
-        E_File["FileScan\n(المستندات الممسوحة)"]:::entityStyle
+        Tick_M["إدارة المعاملات والدعم"]:::tickMod
+        E_Ticket["TransactionTicket\n(تذكرة المعاملة)"]:::tickEnt
+        E_CTicket["ClientTicket\n(تذكرة الطلبات)"]:::tickEnt
+        E_File["FileScan\n(المستندات الممسوحة)"]:::tickEnt
         Tick_M --- E_Ticket & E_CTicket & E_File
     end
 
     subgraph Lab ["موديول العمليات والمختبر Core Lab"]
-        Lab_M["إدارة الفحوصات والتقارير"]:::moduleStyle
-        E_BH["Borehole (الجسّة)"]:::entityStyle
-        E_SS["SoilSample (عينة التربة)"]:::entityStyle
-        E_CS["ConcreteSample (عينة الخرسانة)"]:::entityStyle
-        E_TR["TestResult (نتيجة الاختبار)"]:::entityStyle
-        E_SL["SlumpLog (سجل الهبوط)"]:::entityStyle
-        E_CR["CompactionReport (تقرير الدمك)"]:::entityStyle
-        E_GR["GeotechnicalReport (التقرير النهائي)"]:::entityStyle
+        Lab_M["إدارة الفحوصات والتقارير"]:::labMod
+        E_BH["Borehole\n(الجسّة)"]:::labEnt
+        E_SS["SoilSample\n(عينة التربة)"]:::labEnt
+        E_CS["ConcreteSample\n(عينة الخرسانة)"]:::labEnt
+        E_TR["TestResult\n(نتيجة الاختبار)"]:::labEnt
+        E_SL["SlumpLog\n(سجل الهبوط)"]:::labEnt
+        E_CR["CompactionReport\n(تقرير الدمك)"]:::labEnt
+        E_GR["GeotechnicalReport\n(التقرير النهائي)"]:::labEnt
         Lab_M --- E_BH & E_SS & E_CS & E_TR & E_SL & E_CR & E_GR
     end
 
     subgraph HR ["موديول الموارد البشرية HR"]
-        HR_M["إدارة الموظفين والدوام"]:::moduleStyle
-        E_Emp["Employee (الموظف)"]:::entityStyle
-        E_Att["Attendance (الحضور والانصراف)"]:::entityStyle
-        E_Leave["LeaveRequest (طلب الإجازة)"]:::entityStyle
-        E_Shift["WorkShift (الوردية/الدوام)"]:::entityStyle
-        E_Eval["EvaluationTask (مهمة التقييم)"]:::entityStyle
+        HR_M["إدارة الموظفين والدوام"]:::hrMod
+        E_Emp["Employee\n(الموظف)"]:::hrEnt
+        E_Att["Attendance\n(الحضور والانصراف)"]:::hrEnt
+        E_Leave["LeaveRequest\n(طلب الإجازة)"]:::hrEnt
+        E_Shift["WorkShift\n(الوردية/الدوام)"]:::hrEnt
+        E_Eval["EvaluationTask\n(مهمة التقييم)"]:::hrEnt
         HR_M --- E_Emp & E_Att & E_Leave & E_Shift & E_Eval
     end
 
     subgraph Assets ["موديول الأصول والمستودعات Assets & Stock"]
-        Asset_M["إدارة المركبات والقطع"]:::moduleStyle
-        E_Asset["FixedAsset (الأصل الثابت)"]:::entityStyle
-        E_Veh["VehicleDetail (ملف المركبة)"]:::entityStyle
-        E_VehHO["VehicleHandover (سجل الاستلام)"]:::entityStyle
-        E_Item["StockItem (مادة مخزنية)"]:::entityStyle
-        E_InvTx["InventoryTransaction (حركة مخزنية)"]:::entityStyle
+        Asset_M["إدارة المركبات والقطع"]:::assetMod
+        E_Asset["FixedAsset\n(الأصل الثابت)"]:::assetEnt
+        E_Veh["VehicleDetail\n(ملف المركبة)"]:::assetEnt
+        E_VehHO["VehicleHandover\n(سجل الاستلام)"]:::assetEnt
+        E_Item["StockItem\n(مادة مخزنية)"]:::assetEnt
+        E_InvTx["InventoryTransaction\n(حركة مخزنية)"]:::assetEnt
         Asset_M --- E_Asset & E_Veh & E_VehHO & E_Item & E_InvTx
     end
 
     subgraph Calib ["موديول الصيانة والمعايرة Calibration"]
-        Cal_M["إدارة صيانة ومعايرة المعدات"]:::moduleStyle
-        E_Maint["MaintenanceLog (سجل الصيانة)"]:::entityStyle
-        E_CalRec["CalibrationRecord (سجل المعايرة)"]:::entityStyle
+        Cal_M["إدارة صيانة ومعايرة المعدات"]:::calMod
+        E_Maint["MaintenanceLog\n(سجل الصيانة)"]:::calEnt
+        E_CalRec["CalibrationRecord\n(سجل المعايرة)"]:::calEnt
         Cal_M --- E_Maint & E_CalRec
     end
 
     subgraph Finance ["موديول المالية Finance & GL"]
-        Fin_M["إدارة القيود والربط والفوترة"]:::moduleStyle
-        E_Inv["Invoice (الفاتورة الضريبية)"]:::entityStyle
-        E_Rcpt["PaymentReceipt (سند القبض)"]:::entityStyle
-        E_JE["JournalEntry (قيد اليومية)"]:::entityStyle
-        E_Tax["TaxSetting (إعدادات الضريبة)"]:::entityStyle
+        Fin_M["إدارة القيود والربط والفوترة"]:::finMod
+        E_Inv["Invoice\n(الفاتورة الضريبية)"]:::finEnt
+        E_Rcpt["PaymentReceipt\n(سند القبض)"]:::finEnt
+        E_JE["JournalEntry\n(قيد اليومية)"]:::finEnt
+        E_Tax["TaxSetting\n(إعدادات الضريبة)"]:::finEnt
         Fin_M --- E_Inv & E_Rcpt & E_JE & E_Tax
     end
 
-    %% Styles for subgraphs
-    style CRM fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;
-    style Tickets fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;
-    style Lab fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;
-    style HR fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;
-    style Assets fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;
-    style Calib fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;
-    style Finance fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;
-```
+    %% Layout alignment (2-column grid using hidden links for better spacing)
+    CRM_M ~~~ Lab_M
+    Lab_M ~~~ Asset_M
+    Asset_M ~~~ Fin_M
+    
+    Tick_M ~~~ HR_M
+    HR_M ~~~ Cal_M
+
+    %% Styles for subgraphs (Transparent backgrounds with thick dashed colored borders for clarity)
+    style CRM fill:transparent,stroke:#1E88E5,stroke-width:3px,stroke-dasharray: 5 5,color:#1E88E5,font-size:18px
+    style Tickets fill:transparent,stroke:#8E24AA,stroke-width:3px,stroke-dasharray: 5 5,color:#8E24AA,font-size:18px
+    style Lab fill:transparent,stroke:#43A047,stroke-width:3px,stroke-dasharray: 5 5,color:#43A047,font-size:18px
+    style HR fill:transparent,stroke:#00ACC1,stroke-width:3px,stroke-dasharray: 5 5,color:#00ACC1,font-size:18px
+    style Assets fill:transparent,stroke:#F4511E,stroke-width:3px,stroke-dasharray: 5 5,color:#F4511E,font-size:18px
+    style Calib fill:transparent,stroke:#FDD835,stroke-width:3px,stroke-dasharray: 5 5,color:#FDD835,font-size:18px
+    style Finance fill:transparent,stroke:#E53935,stroke-width:3px,stroke-dasharray: 5 5,color:#E53935,font-size:18px
 
 ---
 
@@ -128,26 +163,30 @@ flowchart TD
 
 ```mermaid
 flowchart TB
-    %% Styling Definition
-    classDef userStyle fill:#1e3a8a,stroke:#172554,stroke-width:2px,color:#ffffff;
-    classDef systemStyle fill:#0f172a,stroke:#1e293b,stroke-width:3px,color:#ffffff;
-    classDef moduleStyle fill:#eff6ff,stroke:#2563eb,stroke-width:2px,color:#1e40af;
-    classDef extStyle fill:#fff5f5,stroke:#ef4444,stroke-width:2px,color:#991b1b;
+    %% إعدادات الخطوط الافتراضية لتكبير وتوضيح كافة العناصر
+    classDef default font-size:16px,font-family:sans-serif,font-weight:bold;
 
-    %% Users & Actors
-    subgraph Users ["المستفيدون من النظام"]
+    %% تعريف الأنماط بألوان عالية التباين ومريحة للعين وحواف دائرية
+    classDef userStyle fill:#00897B,stroke:#004D40,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
+    classDef systemStyle fill:#3949AB,stroke:#1A237E,stroke-width:3px,color:#FFFFFF,rx:12,ry:12;
+    classDef moduleStyle fill:#1E88E5,stroke:#0D47A1,stroke-width:2px,color:#FFFFFF,rx:6,ry:6;
+    classDef extStyle fill:#E53935,stroke:#B71C1C,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
+
+    %% المستفيدون من النظام
+    subgraph Users ["المستفيدون من النظام (Users & Actors)"]
         Client["العميل النهائي\n(Client)\n[بوابة الويب / تطبيق الهاتف]"]:::userStyle
         OfficeStaff["موظفو الإدارة والمبيعات\n(Office Staff)\n[لوحة التحكم بالمتصفح]"]:::userStyle
         LabStaff["فنيو ومدير المختبر\n(Lab Staff)\n[شاشة شيت الاختبارات]"]:::userStyle
         FieldTeam["فريق الحفر والمهندسين الجيولوجيين\n(Field Drillers & Geologists)\n[تطبيق الهاتف المحمول]"]:::userStyle
     end
 
-    %% Internal System (Modular Monolith)
+    %% النظام الداخلي
     subgraph SystemBoundary ["نظام رامسسكو الموحد (Ramssko Lab ERP/LIMS)"]
         direction TB
         ERP_Core["بوابة النظام والواجهة الخلفية الموحدة\n(Laravel Core API & Vue.js Dashboard)"]:::systemStyle
 
         subgraph Modules ["الموديولات البرمجية المعزولة (Laravel Modules)"]
+            direction TB
             M_CoreLab["إدارة المختبر والعمليات الميدانية\n(Core Lab & Field Operations)"]:::moduleStyle
             M_HR["إدارة الموارد البشرية\n(Human Resources & Calendar)"]:::moduleStyle
             M_CRM["التسويق وعلاقات العملاء\n(Marketing & CRM)"]:::moduleStyle
@@ -158,21 +197,21 @@ flowchart TB
         end
     end
 
-    %% External Systems & Integrations
-    subgraph ExternalSystems ["الأنظمة الخارجية والربط الحكومي"]
+    %% الأنظمة الخارجية
+    subgraph ExternalSystems ["الأنظمة الخارجية والربط الحكومي (External Systems)"]
         ZATCA["هيئة الزكاة والضريبة والجمارك (ZATCA)\n[الفاتورة الإلكترونية والمرحلة الثانية]"]:::extStyle
         Microtek["نظام Microtek المالي\n[مزامنة القيود والحسابات الختامية]"]:::extStyle
         GoogleMaps["خدمة خرائط جوجل (Google Maps API)\n[التوثيق الجغرافي وتقييم مواقع الجسات]"]:::extStyle
     end
 
-    %% Interactions and Connections
-    %% Users to Dashboard/Apps
+    %% التفاعلات والاتصالات
+    %% تفاعل المستخدمين مع النظام الأساسي
     Client -->|إنشاء معاملة، تتبع التقارير، سداد الدفعات| ERP_Core
     OfficeStaff -->|إدارة الحسابات، المبيعات، شؤون الموظفين| ERP_Core
     LabStaff -->|إدخال نتائج تكسير الخرسانة والدمك| ERP_Core
     FieldTeam -->|تسجيل استلام السيارة، رفع إحداثيات الجسات| ERP_Core
 
-    %% Dashboard routes to specific Modules
+    %% توجيه النظام الأساسي للموديولات
     ERP_Core --> M_Ticketing
     ERP_Core --> M_CRM
     ERP_Core --> M_CoreLab
@@ -181,7 +220,7 @@ flowchart TB
     ERP_Core --> M_Assets
     ERP_Core --> M_Calibration
 
-    %% Module to Module Internal Interaction examples (via Events/Interfaces)
+    %% التفاعل الداخلي بين الموديولات
     M_CRM -.->|تحويل موافقة العميل والتوقيع| M_CoreLab
     M_CoreLab -.->|إرسال عينات التربة والخرسانة| M_Ticketing
     M_Ticketing -.->|إنشاء معاملة معلقة ملونة| M_Finance
@@ -189,7 +228,13 @@ flowchart TB
     M_Assets -.->|توفير بيانات الحفارات والسيارات| M_Calibration
     M_Calibration -.->|إرسال إشعارات تنبيهات الصيانة| M_HR
 
-    %% Module to External integrations
+    %% التفاعل مع الأنظمة الخارجية
     M_Finance ===>|إرسال الفواتير والضريبة إلكترونياً| ZATCA
     M_Finance ===>|مزامنة الحركات والقيود المالية| Microtek
     M_CoreLab ===>|تحديد وتوثيق إحداثيات الموقع الفعلي| GoogleMaps
+
+    %% تنسيق المجموعات (Subgraphs) بخلفيات شفافة وحدود ملونة عالية التباين
+    style Users fill:transparent,stroke:#00897B,stroke-width:3px,stroke-dasharray: 5 5,color:#00897B,font-size:18px
+    style SystemBoundary fill:transparent,stroke:#3949AB,stroke-width:3px,stroke-dasharray: 5 5,color:#3949AB,font-size:18px
+    style Modules fill:transparent,stroke:#1E88E5,stroke-width:2px,stroke-dasharray: 3 3,color:#1E88E5,font-size:16px
+    style ExternalSystems fill:transparent,stroke:#E53935,stroke-width:3px,stroke-dasharray: 5 5,color:#E53935,font-size:18px
