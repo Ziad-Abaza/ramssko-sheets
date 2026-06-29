@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام توثيق رامسسكو - Ramssko Blueprint Explorer</title>
+    <script>
+        (function () {
+            try {
+                const savedTheme = localStorage.getItem('ramssko-theme');
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const isDark = savedTheme ? savedTheme === 'dark' : prefersDark;
+                document.documentElement.classList.toggle('dark', isDark);
+                document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+            } catch (e) {
+                console.warn('Theme bootstrap failed:', e);
+            }
+        })();
+    </script>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1249,7 +1262,18 @@
                 const loading = ref(false);
                 const renderedContent = ref("");
                 const searchQuery = ref("");
-                const isDark = ref(true);
+                const getStoredTheme = () => {
+                    try {
+                        const saved = localStorage.getItem('ramssko-theme');
+                        if (saved === 'light' || saved === 'dark') {
+                            return saved === 'dark';
+                        }
+                    } catch (e) {
+                        console.warn('Unable to read saved theme:', e);
+                    }
+                    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                };
+                const isDark = ref(getStoredTheme());
 
                 // دالة لتصفية الملفات حسب استعلام البحث
                 const filteredFiles = computed(() => {
@@ -1357,22 +1381,27 @@
                     });
                 };
 
-                const toggleTheme = () => {
-                    isDark.value = !isDark.value;
+                const applyTheme = (darkMode) => {
+                    isDark.value = darkMode;
                     const html = document.documentElement;
-                    if (isDark.value) {
-                        html.classList.add('dark');
-                    } else {
-                        html.classList.remove('dark');
+                    html.classList.toggle('dark', darkMode);
+                    html.style.colorScheme = darkMode ? 'dark' : 'light';
+                    try {
+                        localStorage.setItem('ramssko-theme', darkMode ? 'dark' : 'light');
+                    } catch (e) {
+                        console.warn('Unable to save theme:', e);
                     }
                     if (!isDashboard.value) {
                         updateRender();
                     }
                 };
 
+                const toggleTheme = () => {
+                    applyTheme(!isDark.value);
+                };
+
                 onMounted(() => {
-                    // تهيئة المظهر المظلم افتراضياً
-                    document.documentElement.classList.add('dark');
+                    applyTheme(isDark.value);
                 });
 
                 return {

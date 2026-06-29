@@ -39,40 +39,39 @@
 ### 3. ملكية البيانات والكيانات (Data & Entity Ownership)
 
 يحدد النموذج التالي بدقة الموديول المالك لكل كيان برمجي (Entity Ownership) داخل قاعدة البيانات الموحدة لمنع التداخل البرمجي ولضمان سلامة حوكمة البيانات:
-
-```mermaid
 flowchart TD
     %% إعدادات الخطوط الافتراضية لتكبير وتوضيح كافة العناصر
     classDef default font-size:16px,font-family:sans-serif,font-weight:bold;
 
-    %% تعريف الأنماط بألوان عالية التباين ومريحة للعين
-    %% CRM
-    classDef crmMod fill:#1E88E5,stroke:#0D47A1,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
-    classDef crmEnt fill:#BBDEFB,stroke:#1E88E5,stroke-width:2px,color:#000000,rx:5,ry:5;
+    %% تعريف الأنماط بألوان عالية التباين (ممتازة للوضع الفاتح وشاشات اللابتوب)
     
-    %% Tickets
-    classDef tickMod fill:#8E24AA,stroke:#4A148C,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
-    classDef tickEnt fill:#E1BEE7,stroke:#8E24AA,stroke-width:2px,color:#000000,rx:5,ry:5;
+    %% CRM (أزرق)
+    classDef crmMod fill:#1D4ED8,stroke:#1E3A8A,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
+    classDef crmEnt fill:#EFF6FF,stroke:#1D4ED8,stroke-width:2px,color:#1E3A8A,rx:5,ry:5;
     
-    %% Lab
-    classDef labMod fill:#43A047,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
-    classDef labEnt fill:#C8E6C9,stroke:#43A047,stroke-width:2px,color:#000000,rx:5,ry:5;
+    %% Tickets (بنفسجي)
+    classDef tickMod fill:#7E22CE,stroke:#4C1D95,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
+    classDef tickEnt fill:#FAF5FF,stroke:#7E22CE,stroke-width:2px,color:#4C1D95,rx:5,ry:5;
     
-    %% HR
-    classDef hrMod fill:#00ACC1,stroke:#006064,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
-    classDef hrEnt fill:#B2EBF2,stroke:#00ACC1,stroke-width:2px,color:#000000,rx:5,ry:5;
+    %% Lab (أخضر)
+    classDef labMod fill:#15803D,stroke:#14532D,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
+    classDef labEnt fill:#F0FDF4,stroke:#15803D,stroke-width:2px,color:#14532D,rx:5,ry:5;
     
-    %% Assets
-    classDef assetMod fill:#F4511E,stroke:#BF360C,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
-    classDef assetEnt fill:#FFCCBC,stroke:#F4511E,stroke-width:2px,color:#000000,rx:5,ry:5;
+    %% HR (تركواز)
+    classDef hrMod fill:#0F766E,stroke:#134E4A,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
+    classDef hrEnt fill:#F0FDFA,stroke:#0F766E,stroke-width:2px,color:#134E4A,rx:5,ry:5;
     
-    %% Calibration
-    classDef calMod fill:#FDD835,stroke:#F57F17,stroke-width:2px,color:#000000,rx:8,ry:8;
-    classDef calEnt fill:#FFF9C4,stroke:#FDD835,stroke-width:2px,color:#000000,rx:5,ry:5;
+    %% Assets (برتقالي)
+    classDef assetMod fill:#C2410C,stroke:#7C2D12,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
+    classDef assetEnt fill:#FFF7ED,stroke:#C2410C,stroke-width:2px,color:#7C2D12,rx:5,ry:5;
     
-    %% Finance
-    classDef finMod fill:#E53935,stroke:#B71C1C,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
-    classDef finEnt fill:#FFCDD2,stroke:#E53935,stroke-width:2px,color:#000000,rx:5,ry:5;
+    %% Calibration (عسلي/أصفر داكن)
+    classDef calMod fill:#B45309,stroke:#78350F,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
+    classDef calEnt fill:#FFFBEB,stroke:#B45309,stroke-width:2px,color:#78350F,rx:5,ry:5;
+    
+    %% Finance (أحمر)
+    classDef finMod fill:#B91C1C,stroke:#7F1D1D,stroke-width:2px,color:#FFFFFF,rx:8,ry:8;
+    classDef finEnt fill:#FEF2F2,stroke:#B91C1C,stroke-width:2px,color:#7F1D1D,rx:5,ry:5;
 
     subgraph CRM ["موديول علاقات العملاء CRM"]
         CRM_M["إدارة جهات الاتصال والمبيعات"]:::crmMod
@@ -138,23 +137,14 @@ flowchart TD
         Fin_M --- E_Inv & E_Rcpt & E_JE & E_Tax
     end
 
-    %% Layout alignment (2-column grid using hidden links for better spacing)
-    CRM_M ~~~ Lab_M
-    Lab_M ~~~ Asset_M
-    Asset_M ~~~ Fin_M
-    
-    Tick_M ~~~ HR_M
-    HR_M ~~~ Cal_M
-
-    %% Styles for subgraphs (Transparent backgrounds with thick dashed colored borders for clarity)
-    style CRM fill:transparent,stroke:#1E88E5,stroke-width:3px,stroke-dasharray: 5 5,color:#1E88E5,font-size:18px
-    style Tickets fill:transparent,stroke:#8E24AA,stroke-width:3px,stroke-dasharray: 5 5,color:#8E24AA,font-size:18px
-    style Lab fill:transparent,stroke:#43A047,stroke-width:3px,stroke-dasharray: 5 5,color:#43A047,font-size:18px
-    style HR fill:transparent,stroke:#00ACC1,stroke-width:3px,stroke-dasharray: 5 5,color:#00ACC1,font-size:18px
-    style Assets fill:transparent,stroke:#F4511E,stroke-width:3px,stroke-dasharray: 5 5,color:#F4511E,font-size:18px
-    style Calib fill:transparent,stroke:#FDD835,stroke-width:3px,stroke-dasharray: 5 5,color:#FDD835,font-size:18px
-    style Finance fill:transparent,stroke:#E53935,stroke-width:3px,stroke-dasharray: 5 5,color:#E53935,font-size:18px
-
+    %% تخصيص خلفيات المجموعات لتكون رمادية فاتحة جداً مع إطار واضح للنصوص لضمان وضوحها في الوضع الفاتح
+    style CRM fill:#F8FAFC,stroke:#1D4ED8,stroke-width:2px,color:#0F172A
+    style Tickets fill:#F8FAFC,stroke:#7E22CE,stroke-width:2px,color:#0F172A
+    style Lab fill:#F8FAFC,stroke:#15803D,stroke-width:2px,color:#0F172A
+    style HR fill:#F8FAFC,stroke:#0F766E,stroke-width:2px,color:#0F172A
+    style Assets fill:#F8FAFC,stroke:#C2410C,stroke-width:2px,color:#0F172A
+    style Calib fill:#F8FAFC,stroke:#B45309,stroke-width:2px,color:#0F172A
+    style Finance fill:#F8FAFC,stroke:#B91C1C,stroke-width:2px,color:#0F172A
 ---
 
 ### 4. مخطط سياق النظام والربط الخارجي (Mermaid.js C4 Context Diagram)
