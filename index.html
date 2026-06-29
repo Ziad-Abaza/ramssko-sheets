@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام توثيق رامسسكو - Ramssko Blueprint Explorer</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            950: '#0b0f19',
+                        },
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            200: '#bbdffc',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            950: '#172554',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- Marked.js -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Mermaid.js -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    
+    <!-- Google Fonts: Cairo (Arabic) & Outfit (Latin) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Light Mode CSS Variables for Diagrams */
+            --step-bg: #eff6ff;
+            --step-stroke: #2563eb;
+            --step-color: #1e40af;
+            --dec-bg: #fffbeb;
+            --dec-stroke: #d97706;
+            --dec-color: #92400e;
+            --done-bg: #ecfdf5;
+            --done-stroke: #10b981;
+            --done-color: #065f46;
+            --log-bg: #fffbeb;
+            --log-stroke: #d97706;
+            --log-color: #92400e;
+
+            --user-bg: #1e3a8a;
+            --user-stroke: #172554;
+            --user-color: #ffffff;
+            --sys-bg: #0f172a;
+            --sys-stroke: #1e293b;
+            --sys-color: #ffffff;
+            --mod-bg: #eff6ff;
+            --mod-stroke: #2563eb;
+            --mod-color: #1e40af;
+            --ext-bg: #fff5f5;
+            --ext-stroke: #ef4444;
+            --ext-color: #991b1b;
+        }
+
+        .dark {
+            /* Dark Mode CSS Variables for Diagrams */
+            --step-bg: #1e293b;
+            --step-stroke: #38bdf8;
+            --step-color: #ffffff;
+            --dec-bg: #78350f;
+            --dec-stroke: #f59e0b;
+            --dec-color: #fef3c7;
+            --done-bg: #064e3b;
+            --done-stroke: #34d399;
+            --done-color: #34d399;
+            --log-bg: #78350f;
+            --log-stroke: #f59e0b;
+            --log-color: #fef3c7;
+
+            --user-bg: #1d4ed8;
+            --user-stroke: #60a5fa;
+            --user-color: #ffffff;
+            --sys-bg: #0f172a;
+            --sys-stroke: #475569;
+            --sys-color: #ffffff;
+            --mod-bg: #1e293b;
+            --mod-stroke: #38bdf8;
+            --mod-color: #67e8f9;
+            --ext-bg: #450a0a;
+            --ext-stroke: #f87171;
+            --ext-color: #fecaca;
+        }
+
+        body {
+            font-family: 'Cairo', 'Outfit', sans-serif;
+            background-color: #0f172a;
+        }
+        .dark body {
+            background-color: #0b0f19;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.45);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.35);
+        }
+        .glass-sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            border-left: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .dark .glass-sidebar {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(51, 65, 85, 0.35);
+        }
+
+        /* Markdown Custom Styles */
+        .markdown-body {
+            line-height: 1.85;
+            font-size: 1.05rem;
+        }
+        .markdown-body h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            border-bottom: 2px solid rgba(226, 232, 240, 0.2);
+            padding-bottom: 0.75rem;
+        }
+        .dark .markdown-body h1 {
+            border-bottom-color: rgba(51, 65, 85, 0.4);
+        }
+        .markdown-body h2 {
+            font-size: 1.65rem;
+            font-weight: 700;
+            margin-top: 2.75rem;
+            margin-bottom: 1.25rem;
+            color: #1e40af;
+            border-right: 4px solid #3b82f6;
+            padding-right: 0.75rem;
+            border-radius: 2px;
+        }
+        .dark .markdown-body h2 {
+            color: #60a5fa;
+            border-right-color: #60a5fa;
+        }
+        .markdown-body h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            color: #1e3a8a;
+        }
+        .dark .markdown-body h3 {
+            color: #93c5fd;
+        }
+        .markdown-body p {
+            margin-bottom: 1.25rem;
+            color: #334155;
+            text-align: justify;
+        }
+        .dark .markdown-body p {
+            color: #cbd5e1;
+        }
+        .markdown-body ul {
+            list-style-type: square;
+            padding-right: 1.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .markdown-body ol {
+            list-style-type: decimal;
+            padding-right: 1.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .markdown-body li {
+            margin-bottom: 0.5rem;
+            color: #334155;
+        }
+        .dark .markdown-body li {
+            color: #cbd5e1;
+        }
+        .markdown-body strong {
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .dark .markdown-body strong {
+            color: #f8fafc;
+        }
+
+        /* Lists sub bullets */
+        .markdown-body li ul {
+            list-style-type: circle;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Tables styling */
+        .markdown-body table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 2rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .dark .markdown-body table {
+            border-color: rgba(51, 65, 85, 0.4);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+        .markdown-body th {
+            background-color: #1e3a8a;
+            color: #ffffff;
+            font-weight: 600;
+            padding: 1rem;
+            text-align: right;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+        .dark .markdown-body th {
+            background-color: #1e293b;
+            color: #38bdf8;
+            border-bottom-color: rgba(255,255,255,0.05);
+        }
+        .markdown-body td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+            background: #ffffff;
+            color: #334155;
+            transition: all 0.15s ease;
+        }
+        .dark .markdown-body td {
+            background: #0f172a;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+            color: #cbd5e1;
+        }
+        .markdown-body tr:last-child td {
+            border-bottom: none;
+        }
+        .markdown-body tr:nth-child(even) td {
+            background-color: #f8fafc;
+        }
+        .dark .markdown-body tr:nth-child(even) td {
+            background-color: rgba(30, 41, 59, 0.2);
+        }
+        .markdown-body tr:hover td {
+            background-color: #f1f5f9;
+        }
+        .dark .markdown-body tr:hover td {
+            background-color: #1e293b;
+        }
+
+        /* Blockquotes */
+        .markdown-body blockquote {
+            border-right: 4px solid #2563eb;
+            background-color: #f0f7ff;
+            padding: 1.25rem 1.5rem;
+            margin: 1.75rem 0;
+            border-radius: 4px 12px 12px 4px;
+        }
+        .dark .markdown-body blockquote {
+            border-right-color: #3b82f6;
+            background-color: rgba(30, 58, 138, 0.15);
+        }
+        .markdown-body blockquote p {
+            margin-bottom: 0;
+            color: #1e40af;
+            font-weight: 500;
+        }
+        .dark .markdown-body blockquote p {
+            color: #93c5fd;
+        }
+
+        /* Pre and Code */
+        .markdown-body pre {
+            background-color: #090d16;
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            direction: ltr;
+            text-align: left;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .markdown-body code {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            background: rgba(226, 232, 240, 0.6);
+            color: #0f172a;
+            padding: 0.2rem 0.4rem;
+            border-radius: 6px;
+        }
+        .dark .markdown-body code {
+            background: rgba(51, 65, 85, 0.6);
+            color: #38bdf8;
+        }
+        .markdown-body pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        /* =======================================================
+           Mermaid Accessibility & WCAG AA Contrast Overrides (UI/UX)
+           ======================================================= */
+        .mermaid-wrapper {
+            position: relative;
+            margin: 2.5rem 0;
+        }
+        .mermaid svg {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+        .mermaid text {
+            font-family: 'Cairo', 'Outfit', sans-serif !important;
+        }
+
+        /* ----------------------------------------------------
+           1. FLOWCHARTS & C4 DIALS (WITH CUSTOM INLINE STYLES OVERRIDES)
+           ---------------------------------------------------- */
+        
+        /* --- ☀️ LIGHT MODE CONTRAST OVERRIDES --- */
+        
+        /* Default Flowchart Nodes */
+        .mermaid .node rect, 
+        .mermaid .node circle, 
+        .mermaid .node polygon, 
+        .mermaid .node path {
+            fill: #f8fafc !important;
+            stroke: #2563eb !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .node text, 
+        .mermaid .node .label, 
+        .mermaid .node foreignObject,
+        .mermaid .node foreignObject *,
+        .mermaid .node div,
+        .mermaid .node span {
+            fill: #0b0f19 !important;
+            color: #0b0f19 !important;
+            font-weight: 700 !important;
+        }
+
+        /* Actor/User Nodes (.userStyle) - Combined selectors for highest specificity */
+        .mermaid .node.userStyle rect, .mermaid .node.userStyle circle, .mermaid .node.userStyle polygon, .mermaid .node.userStyle path {
+            fill: #1e3a8a !important; /* Dark Blue */
+            stroke: #172554 !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .node.userStyle text, .mermaid .node.userStyle .label, 
+        .mermaid .node.userStyle foreignObject, .mermaid .node.userStyle foreignObject *,
+        .mermaid .node.userStyle div, .mermaid .node.userStyle span {
+            fill: #ffffff !important; /* White Text */
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+
+        /* Core System (.systemStyle) */
+        .mermaid .node.systemStyle rect, .mermaid .node.systemStyle circle, .mermaid .node.systemStyle polygon, .mermaid .node.systemStyle path {
+            fill: #0f172a !important; /* Dark Slate */
+            stroke: #1e293b !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .node.systemStyle text, .mermaid .node.systemStyle .label, 
+        .mermaid .node.systemStyle foreignObject, .mermaid .node.systemStyle foreignObject *,
+        .mermaid .node.systemStyle div, .mermaid .node.systemStyle span {
+            fill: #ffffff !important; /* White Text */
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+
+        /* Internal Modules (.moduleStyle) */
+        .mermaid .node.moduleStyle rect, .mermaid .node.moduleStyle circle, .mermaid .node.moduleStyle polygon, .mermaid .node.moduleStyle path {
+            fill: #eff6ff !important; /* Soft Light Blue */
+            stroke: #2563eb !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .node.moduleStyle text, .mermaid .node.moduleStyle .label, 
+        .mermaid .node.moduleStyle foreignObject, .mermaid .node.moduleStyle foreignObject *,
+        .mermaid .node.moduleStyle div, .mermaid .node.moduleStyle span {
+            fill: #1e40af !important; /* High-contrast Dark Blue */
+            color: #1e40af !important;
+            font-weight: 700 !important;
+        }
+
+        /* External Systems (.extStyle) */
+        .mermaid .node.extStyle rect, .mermaid .node.extStyle circle, .mermaid .node.extStyle polygon, .mermaid .node.extStyle path {
+            fill: #fff5f5 !important; /* Soft Light Red */
+            stroke: #ef4444 !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .node.extStyle text, .mermaid .node.extStyle .label, 
+        .mermaid .node.extStyle foreignObject, .mermaid .node.extStyle foreignObject *,
+        .mermaid .node.extStyle div, .mermaid .node.extStyle span {
+            fill: #991b1b !important; /* High-contrast Dark Red */
+            color: #991b1b !important;
+            font-weight: 700 !important;
+        }
+
+        /* Success nodes (.successStyle) */
+        .mermaid .node.successStyle rect, .mermaid .node.successStyle circle, .mermaid .node.successStyle polygon, .mermaid .node.successStyle path {
+            fill: #ecfdf5 !important;
+            stroke: #10b981 !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .node.successStyle text, .mermaid .node.successStyle .label, 
+        .mermaid .node.successStyle foreignObject, .mermaid .node.successStyle foreignObject *,
+        .mermaid .node.successStyle div, .mermaid .node.successStyle span {
+            fill: #065f46 !important;
+            color: #065f46 !important;
+            font-weight: 700 !important;
+        }
+
+        /* Fail/Lock nodes (.failStyle) */
+        .mermaid .node.failStyle rect, .mermaid .node.failStyle circle, .mermaid .node.failStyle polygon, .mermaid .node.failStyle path {
+            fill: #fef2f2 !important;
+            stroke: #ef4444 !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .node.failStyle text, .mermaid .node.failStyle .label, 
+        .mermaid .node.failStyle foreignObject, .mermaid .node.failStyle foreignObject *,
+        .mermaid .node.failStyle div, .mermaid .node.failStyle span {
+            fill: #991b1b !important;
+            color: #991b1b !important;
+            font-weight: 700 !important;
+        }
+
+        /* Warning/Alert nodes (.alertStyle) */
+        .mermaid .node.alertStyle rect, .mermaid .node.alertStyle circle, .mermaid .node.alertStyle polygon, .mermaid .node.alertStyle path {
+            fill: #fffbeb !important;
+            stroke: #d97706 !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .node.alertStyle text, .mermaid .node.alertStyle .label, 
+        .mermaid .node.alertStyle foreignObject, .mermaid .node.alertStyle foreignObject *,
+        .mermaid .node.alertStyle div, .mermaid .node.alertStyle span {
+            fill: #92400e !important;
+            color: #92400e !important;
+            font-weight: 700 !important;
+        }
+
+        /* Maker-Checker Workflow Classes overrides (Light Mode) */
+        .mermaid .node.stepStyle rect, .mermaid .node.stepStyle circle, .mermaid .node.stepStyle polygon, .mermaid .node.stepStyle path {
+            fill: #eff6ff !important;
+            stroke: #2563eb !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .node.stepStyle text, .mermaid .node.stepStyle .label, 
+        .mermaid .node.stepStyle foreignObject, .mermaid .node.stepStyle foreignObject *,
+        .mermaid .node.stepStyle div, .mermaid .node.stepStyle span {
+            fill: #1e40af !important;
+            color: #1e40af !important;
+            font-weight: 700 !important;
+        }
+
+        .mermaid .node.decisionStyle rect, .mermaid .node.decisionStyle circle, .mermaid .node.decisionStyle polygon, .mermaid .node.decisionStyle path {
+            fill: #fffbeb !important;
+            stroke: #d97706 !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .node.decisionStyle text, .mermaid .node.decisionStyle .label, 
+        .mermaid .node.decisionStyle foreignObject, .mermaid .node.decisionStyle foreignObject *,
+        .mermaid .node.decisionStyle div, .mermaid .node.decisionStyle span {
+            fill: #92400e !important;
+            color: #92400e !important;
+            font-weight: 700 !important;
+        }
+
+        .mermaid .node.doneStyle rect, .mermaid .node.doneStyle circle, .mermaid .node.doneStyle polygon, .mermaid .node.doneStyle path {
+            fill: #ecfdf5 !important;
+            stroke: #10b981 !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .node.doneStyle text, .mermaid .node.doneStyle .label, 
+        .mermaid .node.doneStyle foreignObject, .mermaid .node.doneStyle foreignObject *,
+        .mermaid .node.doneStyle div, .mermaid .node.doneStyle span {
+            fill: #065f46 !important;
+            color: #065f46 !important;
+            font-weight: 700 !important;
+        }
+
+        .mermaid .node.logStyle rect, .mermaid .node.logStyle circle, .mermaid .node.logStyle polygon, .mermaid .node.logStyle path {
+            fill: #fffbeb !important;
+            stroke: #d97706 !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .node.logStyle text, .mermaid .node.logStyle .label, 
+        .mermaid .node.logStyle foreignObject, .mermaid .node.logStyle foreignObject *,
+        .mermaid .node.logStyle div, .mermaid .node.logStyle span {
+            fill: #92400e !important;
+            color: #92400e !important;
+            font-weight: 700 !important;
+        }
+
+        /* Entity/Properties sub-nodes inside boundary diagrams (.entityStyle) */
+        .mermaid .node.entityStyle rect, .mermaid .node.entityStyle circle, .mermaid .node.entityStyle polygon, .mermaid .node.entityStyle path {
+            fill: #ffffff !important;
+            stroke: #475569 !important;
+            stroke-width: 1.5px !important;
+        }
+        .mermaid .node.entityStyle text, .mermaid .node.entityStyle .label, 
+        .mermaid .node.entityStyle foreignObject, .mermaid .node.entityStyle foreignObject *,
+        .mermaid .node.entityStyle div, .mermaid .node.entityStyle span {
+            fill: #334155 !important;
+            color: #334155 !important;
+            font-weight: 600 !important;
+        }
+
+        /* Clusters / Subgraphs */
+        .mermaid .cluster rect {
+            fill: #f1f5f9 !important;
+            stroke: #cbd5e1 !important;
+            stroke-width: 2px !important;
+            rx: 12px;
+            ry: 12px;
+        }
+        
+        /* Edges / Lines Label Contrast */
+        .mermaid .edgePath .path {
+            stroke: #2563eb !important;
+            stroke-width: 2.5px !important;
+        }
+        .mermaid .edgePath .markerPath {
+            fill: #2563eb !important;
+            stroke: #2563eb !important;
+        }
+        .mermaid .edgeLabel rect {
+            fill: #ffffff !important;
+            rx: 4px;
+        }
+        .mermaid .edgeLabel,
+        .mermaid .edgeLabel *,
+        .mermaid .edgeLabel text, 
+        .mermaid .edgeLabel span,
+        .mermaid .edgeLabel div {
+            fill: #1e3a8a !important; /* Dark Blue Text */
+            color: #1e3a8a !important;
+            font-weight: 700 !important;
+            font-size: 12px !important;
+            background-color: #ffffff !important;
+        }
+
+
+        /* --- 🌙 DARK MODE CONTRAST OVERRIDES --- */
+
+        /* Default Flowchart Nodes */
+        .dark .mermaid .node rect, 
+        .dark .mermaid .node circle, 
+        .dark .mermaid .node polygon, 
+        .dark .mermaid .node path {
+            fill: #1e293b !important; /* Slate-800 */
+            stroke: #38bdf8 !important; /* Glowing Blue */
+            stroke-width: 2px !important;
+        }
+        .dark .mermaid .node text, 
+        .dark .mermaid .node .label, 
+        .dark .mermaid .node foreignObject,
+        .dark .mermaid .node foreignObject *,
+        .dark .mermaid .node div,
+        .dark .mermaid .node span {
+            fill: #ffffff !important; /* White Text */
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+
+        /* Actor/User Nodes (.userStyle) */
+        .dark .mermaid .node.userStyle rect, .dark .mermaid .node.userStyle circle, .dark .mermaid .node.userStyle polygon, .dark .mermaid .node.userStyle path {
+            fill: #1d4ed8 !important; /* Dark Blue */
+            stroke: #60a5fa !important;
+            stroke-width: 2px !important;
+        }
+        .dark .mermaid .node.userStyle text, .dark .mermaid .node.userStyle .label, 
+        .dark .mermaid .node.userStyle foreignObject, .dark .mermaid .node.userStyle foreignObject *,
+        .dark .mermaid .node.userStyle div, .dark .mermaid .node.userStyle span {
+            fill: #ffffff !important; /* White Text */
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+
+        /* Core System (.systemStyle) */
+        .dark .mermaid .node.systemStyle rect, .dark .mermaid .node.systemStyle circle, .dark .mermaid .node.systemStyle polygon, .dark .mermaid .node.systemStyle path {
+            fill: #0f172a !important; /* Slate-900 */
+            stroke: #475569 !important;
+            stroke-width: 2px !important;
+        }
+        .dark .mermaid .node.systemStyle text, .dark .mermaid .node.systemStyle .label, 
+        .dark .mermaid .node.systemStyle foreignObject, .dark .mermaid .node.systemStyle foreignObject *,
+        .dark .mermaid .node.systemStyle div, .dark .mermaid .node.systemStyle span {
+            fill: #ffffff !important; /* White Text */
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+
+        /* Internal Modules (.moduleStyle) */
+        .dark .mermaid .node.moduleStyle rect, .dark .mermaid .node.moduleStyle circle, .dark .mermaid .node.moduleStyle polygon, .dark .mermaid .node.moduleStyle path {
+            fill: #1e293b !important; /* Slate-800 background */
+            stroke: #38bdf8 !important;
+            stroke-width: 2px !important;
+        }
+        .dark .mermaid .node.moduleStyle text, .dark .mermaid .node.moduleStyle .label, 
+        .dark .mermaid .node.moduleStyle foreignObject, .dark .mermaid .node.moduleStyle foreignObject *,
+        .dark .mermaid .node.moduleStyle div, .dark .mermaid .node.moduleStyle span {
+            fill: #67e8f9 !important; /* High-contrast Cyan Text */
+            color: #67e8f9 !important;
+            font-weight: 700 !important;
+        }
+
+        /* External Systems (.extStyle) */
+        .dark .mermaid .node.extStyle rect, .dark .mermaid .node.extStyle circle, .dark .mermaid .node.extStyle polygon, .dark .mermaid .node.extStyle path {
+            fill: #450a0a !important; /* Dark Red background */
+            stroke: #f87171 !important;
+            stroke-width: 2px !important;
+        }
+        .dark .mermaid .node.extStyle text, .dark .mermaid .node.extStyle .label, 
+        .dark .mermaid .node.extStyle foreignObject, .dark .mermaid .node.extStyle foreignObject *,
+        .dark .mermaid .node.extStyle div, .dark .mermaid .node.extStyle span {
+            fill: #fecaca !important; /* High-contrast Light Red Text */
+            color: #fecaca !important;
+            font-weight: 700 !important;
+        }
+
+        /* Success nodes (.successStyle) */
+        .dark .mermaid .node.successStyle rect, .dark .mermaid .node.successStyle circle, .dark .mermaid .node.successStyle polygon, .dark .mermaid .node.successStyle path {
+            fill: #064e3b !important;
+            stroke: #10b981 !important;
+            stroke-width: 2px !important;
+        }
+        .dark .mermaid .node.successStyle text, .dark .mermaid .node.successStyle .label, 
+        .dark .mermaid .node.successStyle foreignObject, .dark .mermaid .node.successStyle foreignObject *,
+        .dark .mermaid .node.successStyle div, .dark .mermaid .node.successStyle span {
+            fill: #34d399 !important;
+            color: #34d399 !important;
+            font-weight: 700 !important;
+        }
+
+        /* Fail/Lock nodes (.failStyle) */
+        .dark .mermaid .node.failStyle rect, .dark .mermaid .node.failStyle circle, .dark .mermaid .node.failStyle polygon, .dark .mermaid .node.failStyle path {
+            fill: #450a0a !important;
+            stroke: #ef4444 !important;
+            stroke-width: 2px !important;
+        }
+        .dark .mermaid .node.failStyle text, .dark .mermaid .node.failStyle .label, 
+        .dark .mermaid .node.failStyle foreignObject, .dark .mermaid .node.failStyle foreignObject *,
+        .dark .mermaid .node.failStyle div, .dark .mermaid .node.failStyle span {
+            fill: #fca5a5 !important;
+            color: #fca5a5 !important;
+            font-weight: 700 !important;
+        }
+
+        /* Warning/Alert nodes (.alertStyle) */
+        .dark .mermaid .node.alertStyle rect, .dark .mermaid .node.alertStyle circle, .dark .mermaid .node.alertStyle polygon, .dark .mermaid .node.alertStyle path {
+            fill: #78350f !important;
+            stroke: #d97706 !important;
+            stroke-width: 2px !important;
+        }
+        .dark .mermaid .node.alertStyle text, .dark .mermaid .node.alertStyle .label, 
+        .dark .mermaid .node.alertStyle foreignObject, .dark .mermaid .node.alertStyle foreignObject *,
+        .dark .mermaid .node.alertStyle div, .dark .mermaid .node.alertStyle span {
+            fill: #fef3c7 !important;
+            color: #fef3c7 !important;
+            font-weight: 700 !important;
+        }
+
+        /* Maker-Checker Workflow Classes overrides (Dark Mode) */
+        .dark .mermaid .node.stepStyle rect, .dark .mermaid .node.stepStyle circle, .dark .mermaid .node.stepStyle polygon, .dark .mermaid .node.stepStyle path {
+            fill: #1e293b !important;
+            stroke: #38bdf8 !important;
+            stroke-width: 2px !important;
+        }
+        .dark .mermaid .node.stepStyle text, .dark .mermaid .node.stepStyle .label, 
+        .dark .mermaid .node.stepStyle foreignObject, .dark .mermaid .node.stepStyle foreignObject *,
+        .dark .mermaid .node.stepStyle div, .dark .mermaid .node.stepStyle span {
+            fill: #ffffff !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+
+        .dark .mermaid .node.decisionStyle rect, .dark .mermaid .node.decisionStyle circle, .dark .mermaid .node.decisionStyle polygon, .dark .mermaid .node.decisionStyle path {
+            fill: #78350f !important;
+            stroke: #f59e0b !important;
+            stroke-width: 2px !important;
+        }
+        .dark .mermaid .node.decisionStyle text, .dark .mermaid .node.decisionStyle .label, 
+        .dark .mermaid .node.decisionStyle foreignObject, .dark .mermaid .node.decisionStyle foreignObject *,
+        .dark .mermaid .node.decisionStyle div, .dark .mermaid .node.decisionStyle span {
+            fill: #fef3c7 !important;
+            color: #fef3c7 !important;
+            font-weight: 700 !important;
+        }
+
+        .dark .mermaid .node.doneStyle rect, .dark .mermaid .node.doneStyle circle, .dark .mermaid .node.doneStyle polygon, .dark .mermaid .node.doneStyle path {
+            fill: #064e3b !important;
+            stroke: #34d399 !important;
+            stroke-width: 2px !important;
+        }
+        .dark .mermaid .node.doneStyle text, .dark .mermaid .node.doneStyle .label, 
+        .dark .mermaid .node.doneStyle foreignObject, .dark .mermaid .node.doneStyle foreignObject *,
+        .dark .mermaid .node.doneStyle div, .dark .mermaid .node.doneStyle span {
+            fill: #34d399 !important;
+            color: #34d399 !important;
+            font-weight: 700 !important;
+        }
+
+        .dark .mermaid .node.logStyle rect, .dark .mermaid .node.logStyle circle, .dark .mermaid .node.logStyle polygon, .dark .mermaid .node.logStyle path {
+            fill: #78350f !important;
+            stroke: #f59e0b !important;
+            stroke-width: 2px !important;
+        }
+        .dark .mermaid .node.logStyle text, .dark .mermaid .node.logStyle .label, 
+        .dark .mermaid .node.logStyle foreignObject, .dark .mermaid .node.logStyle foreignObject *,
+        .dark .mermaid .node.logStyle div, .dark .mermaid .node.logStyle span {
+            fill: #fef3c7 !important;
+            color: #fef3c7 !important;
+            font-weight: 700 !important;
+        }
+
+        /* Entity/Properties sub-nodes (.entityStyle) */
+        .dark .mermaid .node.entityStyle rect, .dark .mermaid .node.entityStyle circle, .dark .mermaid .node.entityStyle polygon, .dark .mermaid .node.entityStyle path {
+            fill: #1e293b !important;
+            stroke: #475569 !important;
+            stroke-width: 1.5px !important;
+        }
+        .dark .mermaid .node.entityStyle text, .dark .mermaid .node.entityStyle .label, 
+        .dark .mermaid .node.entityStyle foreignObject, .dark .mermaid .node.entityStyle foreignObject *,
+        .dark .mermaid .node.entityStyle div, .dark .mermaid .node.entityStyle span {
+            fill: #cbd5e1 !important;
+            color: #cbd5e1 !important;
+            font-weight: 600 !important;
+        }
+
+        /* Clusters / Subgraphs */
+        .dark .mermaid .cluster rect {
+            fill: #090d16 !important;
+            stroke: #1e293b !important;
+            stroke-width: 2px !important;
+            rx: 12px;
+            ry: 12px;
+        }
+
+        /* Edges / Lines Label Contrast */
+        .dark .mermaid .edgePath .path {
+            stroke: #38bdf8 !important;
+            stroke-width: 2.5px !important;
+        }
+        .dark .mermaid .edgePath .markerPath {
+            fill: #38bdf8 !important;
+            stroke: #38bdf8 !important;
+        }
+        .dark .mermaid .edgeLabel rect {
+            fill: #090d16 !important; /* Slate-950 background */
+            rx: 4px;
+        }
+        .dark .mermaid .edgeLabel,
+        .dark .mermaid .edgeLabel *,
+        .dark .mermaid .edgeLabel text, 
+        .dark .mermaid .edgeLabel span,
+        .dark .mermaid .edgeLabel div {
+            fill: #38bdf8 !important; /* Glowing Blue Text */
+            color: #38bdf8 !important;
+            font-weight: 700 !important;
+            font-size: 12px !important;
+            background-color: #090d16 !important;
+        }
+
+
+        /* ----------------------------------------------------
+           2. SEQUENCE DIAGRAMS CONTRAST OVERRIDES
+           ---------------------------------------------------- */
+
+        /* --- ☀️ LIGHT MODE CONTRAST OVERRIDES --- */
+        
+        /* Actor Boxes */
+        .mermaid rect.actor {
+            fill: #eff6ff !important;
+            stroke: #2563eb !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid text.actor,
+        .mermaid text.actor *,
+        .mermaid .actor text,
+        .mermaid .actor span {
+            fill: #1e3a8a !important;
+            color: #1e3a8a !important;
+            font-weight: 800 !important;
+        }
+        /* Note Boxes */
+        .mermaid rect.note {
+            fill: #fef3c7 !important; /* Amber Yellow */
+            stroke: #d97706 !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .noteText, 
+        .mermaid .noteText *,
+        .mermaid .noteText span {
+            fill: #78350f !important; /* High-contrast Dark Brown */
+            color: #78350f !important;
+            font-weight: 700 !important;
+        }
+        /* Loop & Alt Boxes */
+        .mermaid rect.loopBox {
+            fill: #f8fafc !important;
+            stroke: #cbd5e1 !important;
+        }
+        .mermaid .loopText, 
+        .mermaid .loopText *,
+        .mermaid .loopText span {
+            fill: #0f172a !important;
+            color: #0f172a !important;
+            font-weight: 700 !important;
+        }
+        /* Signals & Arrows */
+        .mermaid .messageLine0, .mermaid .messageLine1 {
+            stroke: #2563eb !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .messageText,
+        .mermaid .messageText * {
+            fill: #0f172a !important;
+            color: #0f172a !important;
+            font-weight: 700 !important;
+        }
+
+
+        /* --- 🌙 DARK MODE CONTRAST OVERRIDES --- */
+        
+        /* Actor Boxes */
+        .dark .mermaid rect.actor {
+            fill: #1e293b !important;
+            stroke: #38bdf8 !important;
+            stroke-width: 2px !important;
+        }
+        .dark .mermaid text.actor,
+        .dark .mermaid text.actor *,
+        .dark .mermaid .actor text,
+        .dark .mermaid .actor span {
+            fill: #ffffff !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+        }
+        /* Note Boxes */
+        .dark .mermaid rect.note {
+            fill: #172554 !important; /* Deep Blue */
+            stroke: #3b82f6 !important;
+            stroke-width: 2px !important;
+        }
+        .dark .mermaid .noteText, 
+        .dark .mermaid .noteText *,
+        .dark .mermaid .noteText span {
+            fill: #e0effe !important; /* High-contrast Light Blue */
+            color: #e0effe !important;
+            font-weight: 700 !important;
+        }
+        /* Loop & Alt Boxes */
+        .dark .mermaid rect.loopBox {
+            fill: #0f172a !important;
+            stroke: #334155 !important;
+        }
+        .dark .mermaid .loopText, 
+        .dark .mermaid .loopText *,
+        .dark .mermaid .loopText span {
+            fill: #ffffff !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+        /* Signals & Arrows */
+        .dark .mermaid .messageLine0, .dark .mermaid .messageLine1 {
+            stroke: #38bdf8 !important;
+            stroke-width: 2px !important;
+        }
+        .dark .mermaid .messageText,
+        .dark .mermaid .messageText * {
+            fill: #f8fafc !important;
+            color: #f8fafc !important;
+            font-weight: 700 !important;
+        }
+
+        /* ----------------------------------------------------
+           3. STATE DIAGRAMS CONTRAST OVERRIDES
+           ---------------------------------------------------- */
+        
+        /* --- ☀️ LIGHT MODE STATE OVERRIDES --- */
+        .mermaid .state-base rect,
+        .mermaid .state-base circle,
+        .mermaid .state-base polygon,
+        .mermaid .state-base path {
+            fill: #f8fafc !important;
+            stroke: #2563eb !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .state-title,
+        .mermaid .state-title *,
+        .mermaid .state-base text,
+        .mermaid .state-base span {
+            fill: #0b0f19 !important;
+            color: #0b0f19 !important;
+            font-weight: 700 !important;
+        }
+
+        /* --- 🌙 DARK MODE STATE OVERRIDES --- */
+        .dark .mermaid .state-base rect,
+        .dark .mermaid .state-base circle,
+        .dark .mermaid .state-base polygon,
+        .dark .mermaid .state-base path {
+            fill: #1e293b !important;
+            stroke: #38bdf8 !important;
+            stroke-width: 2px !important;
+        }
+        .dark .mermaid .state-title,
+        .dark .mermaid .state-title *,
+        .dark .mermaid .state-base text,
+        .dark .mermaid .state-base span {
+            fill: #ffffff !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden transition-colors duration-200 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200">
+
+    <div id="app" class="flex w-full h-full">
+        
+        <!-- Sidebar -->
+        <aside class="w-80 glass-sidebar flex flex-col shadow-2xl z-10">
+            <div class="p-6 border-b border-slate-200/80 dark:border-slate-800/80 bg-gradient-to-br from-brand-900 to-brand-800 text-white relative overflow-hidden">
+                <!-- Decorative background elements -->
+                <div class="absolute -right-10 -bottom-10 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+                <div class="absolute -left-10 -top-10 w-24 h-24 bg-brand-500/20 rounded-full blur-xl"></div>
+                
+                <div class="flex items-center space-x-2 space-x-reverse">
+                    <span class="text-2xl">📘</span>
+                    <div>
+                        <h1 class="text-lg font-black tracking-wide">رامسسكو للتربة والخرسانة</h1>
+                        <p class="text-xs text-brand-200/90 font-mono mt-0.5">Ramssko Lab Blueprint v1.0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Global Search -->
+            <div class="p-4 border-b border-slate-100 dark:border-slate-800/60">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        v-model="searchQuery" 
+                        placeholder="ابحث في الدليل والمخطط..." 
+                        class="w-full px-4 py-2.5 pl-9 text-right text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-200"
+                    >
+                    <span class="absolute left-3 top-3 text-slate-400">🔍</span>
+                </div>
+            </div>
+            
+            <!-- Document List -->
+            <nav class="flex-1 overflow-y-auto p-4 space-y-1.5">
+                <button 
+                    @click="selectDashboard"
+                    :class="['w-full text-right px-4 py-3 rounded-xl transition-all duration-200 flex items-center justify-between', 
+                             isDashboard ? 'bg-gradient-to-l from-brand-50 to-brand-100/50 dark:from-brand-950/40 dark:to-brand-900/10 text-brand-700 dark:text-brand-400 border-r-4 border-brand-500 font-bold shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/60 dark:hover:bg-slate-900/50']"
+                >
+                    <div class="flex items-center space-x-2.5 space-x-reverse">
+                        <span>📊</span>
+                        <span>لوحة التحكم والملخص العام</span>
+                    </div>
+                    <span v-if="isDashboard" class="text-brand-500 text-xs">◀</span>
+                </button>
+
+                <div class="pt-2 pb-1 px-4 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">الملفات والمخططات</div>
+                
+                <button 
+                    v-for="(file, index) in filteredFiles" 
+                    :key="index"
+                    @click="selectFile(file.originalIndex)"
+                    :class="['w-full text-right px-4 py-3 rounded-xl transition-all duration-200 flex items-center justify-between', 
+                             (!isDashboard && currentIndex === file.originalIndex) ? 'bg-gradient-to-l from-brand-50 to-brand-100/50 dark:from-brand-950/40 dark:to-brand-900/10 text-brand-700 dark:text-brand-400 border-r-4 border-brand-500 font-bold shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/60 dark:hover:bg-slate-900/50']"
+                >
+                    <div class="flex items-center space-x-2.5 space-x-reverse overflow-hidden">
+                        <span class="text-slate-400">{{ (!isDashboard && currentIndex === file.originalIndex) ? '📖' : '📄' }}</span>
+                        <span class="truncate text-sm">{{ file.name.substring(4) }}</span>
+                    </div>
+                    <span v-if="!isDashboard && currentIndex === file.originalIndex" class="text-brand-500 text-xs">◀</span>
+                </button>
+                
+                <div v-if="filteredFiles.length === 0" class="p-4 text-center text-sm text-slate-400">
+                    لا توجد نتائج بحث مطابقة
+                </div>
+            </nav>
+
+            <!-- Theme Toggle and Info -->
+            <div class="p-4 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-between">
+                <button 
+                    @click="toggleTheme" 
+                    class="p-2 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 transition-all duration-200 text-lg shadow-sm"
+                    title="تغيير المظهر"
+                >
+                    {{ isDark ? '☀️' : '🌙' }}
+                </button>
+                <div class="text-right">
+                    <p class="text-[10px] text-slate-400 font-medium">مهندس الحلول والمخطط الفني</p>
+                    <p class="text-[11px] text-slate-600 dark:text-slate-400 font-bold font-mono">Antigravity Architect</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-6 md:p-10 relative bg-slate-100/30 dark:bg-slate-950/20">
+            <div v-if="loading" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-slate-950/50 z-20 backdrop-blur-sm">
+                <div class="flex flex-col items-center space-y-3">
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-500"></div>
+                    <span class="text-sm font-semibold text-slate-600 dark:text-slate-400">جاري قراءة وتحميل المخطط...</span>
+                </div>
+            </div>
+
+            <div class="max-w-5xl mx-auto min-h-full flex flex-col">
+                <!-- Dashboard View -->
+                <div v-if="isDashboard" class="space-y-6 flex-1">
+                    <!-- Banner -->
+                    <div class="p-8 rounded-2xl bg-gradient-to-r from-brand-900 via-brand-800 to-brand-700 text-white shadow-xl relative overflow-hidden">
+                        <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+                        <div class="max-w-3xl">
+                            <span class="px-3 py-1 bg-brand-500/30 text-brand-200 text-xs rounded-full font-bold uppercase tracking-wider">مخطط البنية والتحليل المعماري</span>
+                            <h2 class="text-3xl font-black mt-3 mb-2 leading-snug">نظام المعاملات الفنية ومختبرات فحص التربة والخرسانة</h2>
+                            <p class="text-brand-100 text-sm leading-relaxed max-w-2xl">
+                                مرحبًا بك في الدليل والمستودع البرمجي التفاعلي لنظام رامسسكو. يوفر هذا الدليل التفصيلي للمهندسين والمطورين والمحللين نظرة شاملة حول مصفوفة الموديولات والحدود المعمارية وقواعد العمل الميدانية والمعملية للامتثال لمتطلبات ZATCA و ISO 17025.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="glass-card p-5 rounded-2xl shadow-sm text-center">
+                            <p class="text-3xl font-black text-brand-600 dark:text-brand-400 font-mono">10</p>
+                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">أنظمة فرعية مدمجة</p>
+                        </div>
+                        <div class="glass-card p-5 rounded-2xl shadow-sm text-center">
+                            <p class="text-3xl font-black text-brand-600 dark:text-brand-400 font-mono">7</p>
+                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">أدلة ومخططات فنية</p>
+                        </div>
+                        <div class="glass-card p-5 rounded-2xl shadow-sm text-center">
+                            <p class="text-3xl font-black text-brand-600 dark:text-brand-400 font-mono">15+</p>
+                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">معادلة وقاعدة نجاح</p>
+                        </div>
+                        <div class="glass-card p-5 rounded-2xl shadow-sm text-center">
+                            <p class="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">100%</p>
+                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">امتثال ISO و ZATCA</p>
+                        </div>
+                    </div>
+
+                    <!-- Core Modules Map -->
+                    <div class="glass-card p-6 md:p-8 rounded-2xl shadow-sm">
+                        <h3 class="text-lg font-bold mb-4 flex items-center">
+                            <span class="ml-2">📌</span> الهيكل البرمجي المعتمد (Modular Monolith)
+                        </h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
+                            تمت هندسة النظام وتفكيكه إلى 7 موديولات برمجية رئيسية تجمع الأنظمة الفرعية العشرة لضمان عزل البيانات وسهولة الصيانة والتطوير:
+                        </p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 flex items-start space-x-3 space-x-reverse hover:border-brand-500/50 transition-all duration-200">
+                                <span class="p-2.5 bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 rounded-lg text-lg">🧪</span>
+                                <div>
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200">1. العمليات الميدانية والمختبر (Manage Lobe)</h4>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">تسجيل قراءات الجسات، شيتات إدخال نتائج اختبارات التربة والخرسانة، التقارير الجيوتقنية.</p>
+                                </div>
+                            </div>
+                            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 flex items-start space-x-3 space-x-reverse hover:border-brand-500/50 transition-all duration-200">
+                                <span class="p-2.5 bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 rounded-lg text-lg">👥</span>
+                                <div>
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200">2. الموارد البشرية (HR Module)</h4>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">شؤون الموظفين، الحضور والانصراف، الأجندة الإدارية والورديات، وتقييم المهندسين والفنيين.</p>
+                                </div>
+                            </div>
+                            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 flex items-start space-x-3 space-x-reverse hover:border-brand-500/50 transition-all duration-200">
+                                <span class="p-2.5 bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 rounded-lg text-lg">🤝</span>
+                                <div>
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200">3. التسويق وعلاقات العملاء (CRM)</h4>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">قنوات التسويق، فرص المبيعات، توليد عروض الأسعار بصيغة RAM-D-F، والتواقيع الإلكترونية.</p>
+                                </div>
+                            </div>
+                            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 flex items-start space-x-3 space-x-reverse hover:border-brand-500/50 transition-all duration-200">
+                                <span class="p-2.5 bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 rounded-lg text-lg">🎫</span>
+                                <div>
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200">4. البوابة وإدارة التذاكر (Ticketing)</h4>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">بوابات العميل والموظف، رفع التحويلات والتواقيع، ومتابعة الحالات على لوحات التحكم الملونة.</p>
+                                </div>
+                            </div>
+                            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 flex items-start space-x-3 space-x-reverse hover:border-brand-500/50 transition-all duration-200">
+                                <span class="p-2.5 bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 rounded-lg text-lg">⚙️</span>
+                                <div>
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200">5. الصيانة والمعايرة (Calibration)</h4>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">صيانة الحفارات والسيارات، وجدولة معايرة أجهزة الفحص لمنع إدخال نتائج من أجهزة منتهية المعايرة.</p>
+                                </div>
+                            </div>
+                            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 flex items-start space-x-3 space-x-reverse hover:border-brand-500/50 transition-all duration-200">
+                                <span class="p-2.5 bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 rounded-lg text-lg">🚛</span>
+                                <div>
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200">6. الأصول والمخازن (Fixed Assets & Stock)</h4>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">سجل السيارات والحفارات وتواقيع استلام السيارات، وإدارة مستلزمات الحفر وقطع الغيار وأدوات المعمل.</p>
+                                </div>
+                            </div>
+                            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 flex items-start space-x-3 space-x-reverse hover:border-brand-500/50 transition-all duration-200">
+                                <span class="p-2.5 bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 rounded-lg text-lg">💰</span>
+                                <div>
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200">7. المالية ودفتر الأستاذ (Finance & GL)</h4>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">فوترة عروض الأسعار، شرط الـ 50% تأمين لبدء التنفيذ، الربط الضريبي مع ZATCA والتكامل مع Microtek.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Document Content View -->
+                <div v-else class="flex-1 flex flex-col">
+                    <!-- Glass Container -->
+                    <div class="glass-card p-6 md:p-10 rounded-2xl shadow-lg flex-1">
+                        <!-- File Header Info -->
+                        <div class="mb-8 pb-4 border-b border-slate-200/60 dark:border-slate-800/60 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                            <div>
+                                <span class="px-2.5 py-0.5 bg-brand-100 dark:bg-brand-950/60 text-brand-700 dark:text-brand-400 text-xs rounded-full font-bold">الملف الفني</span>
+                                <h2 class="text-2xl font-black text-slate-800 dark:text-slate-200 mt-2">{{ currentFile.name }}</h2>
+                            </div>
+                            <div class="flex items-center space-x-3 space-x-reverse font-mono text-xs text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-200/50 dark:border-slate-800/50">
+                                <span>📁 path:</span>
+                                <span>Blueprint/{{ currentFile.filename }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Markdown Output Area -->
+                        <div class="markdown-body" v-html="renderedContent"></div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <footer class="mt-8 py-6 text-center text-xs text-slate-400 dark:text-slate-500 border-t border-slate-200/50 dark:border-slate-800/40">
+                    نظام توثيق وهندسة معمارية مختبرات رامسسكو • جميع الحقوق محفوظة لـ <strong>مؤسسة رامسسكو</strong> © 2026
+                </footer>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Full Screen Modal for Zooming Mermaid Diagrams -->
+    <div id="diagram-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md hidden z-50 flex flex-col items-center justify-center p-4">
+        <!-- Modal Toolbar -->
+        <div class="absolute top-4 left-4 flex items-center space-x-2 space-x-reverse">
+            <button onclick="window.zoomOut()" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-white text-sm border border-slate-700 shadow-md backdrop-blur-sm" title="تصغير">➖</button>
+            <button onclick="window.resetZoom()" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-white text-sm border border-slate-700 shadow-md backdrop-blur-sm" title="إعادة تعيين">1:1</button>
+            <button onclick="window.zoomIn()" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-white text-sm border border-slate-700 shadow-md backdrop-blur-sm" title="تكبير">➕</button>
+            <button onclick="window.closeDiagramModal()" class="p-2.5 rounded-xl bg-red-600/80 hover:bg-red-500 text-white text-sm border border-red-500 shadow-md backdrop-blur-sm mr-2" title="إغلاق">✕</button>
+        </div>
+        
+        <!-- Modal Title -->
+        <div class="absolute top-4 right-4 text-white">
+            <h3 class="text-lg font-bold">عرض المخطط بالحجم الكامل</h3>
+            <p class="text-xs text-slate-400">يمكنك استخدام زري التكبير والتصغير أو تمرير الماوس للتنقل</p>
+        </div>
+
+        <div id="modal-content" class="w-full h-full max-w-7xl max-h-[80vh] flex items-center justify-center overflow-auto p-6 bg-slate-900/40 rounded-3xl border border-slate-800/50 shadow-inner">
+            <!-- Rendered SVG goes here -->
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, nextTick } = Vue;
+
+        createApp({
+            setup() {
+                // دمج بيانات ومحتويات الملفات السبعة مباشرة هنا
+                const files = ref(
+                    [
+    {
+        "name": "00. الملخص التنفيذي وقاموس المصطلحات",
+        "filename": "00_Executive_Summary_and_Glossary.md",
+        "content": "# المخطط الفني والتجاري لنظام رامسسكو (Ramssko Lab ERP/LIMS)\n## الجزء الأول: الملخص التنفيذي، قاموس المصطلحات، والهيكل التنظيمي\n**الملف:** `00_Executive_Summary_and_Glossary.md`\n\n---\n\n### 1. الملخص التنفيذي (Executive Summary)\n\nيُمثل نظام **رامسسكو الموحد (Ramssko Lab ERP/LIMS)** الحل التقني المتكامل والمصمم خصيصاً لإدارة عمليات فحص التربة، وهندسة الأساسات، واختبارات مواد البناء، وحفر الجسات ميدانياً، بالإضافة إلى إدارة العمليات الخلفية (Back-office Operations) بما يشمل الموارد البشرية، والمالية والمحاسبة، وإدارة الأصول الثابتة والمخازن.\n\nيستهدف النظام الانتقال بالعمليات التشغيلية لمختبر رامسسكو من الإجراءات اليدوية والورقية إلى نظام رقمي موحد، معتمد دولياً وحكومياً، من خلال تلبية ثلاثة متطلبات تقنية وتنظيمية كبرى:\n1. **معيار الجودة الدولي (ISO/IEC 17025):** لضمان كفاءة ودقة مختبرات الفحص والمعايرة من خلال أتمتة إدخال البيانات ومراجعتها الفنية الصارمة، وإعادة الاختبارات غير المطابقة، ومراقبة معايرة الأجهزة.\n2. **الربط الحكومي المالي (ZATCA):** التكامل المباشر مع هيئة الزكاة والضريبة والجمارك بالمملكة العربية السعودية لتقديم الفواتير الإلكترونية والضرائب وفق المرحلة الثانية (الربط والتكامل).\n3. **التكامل المالي مع الأنظمة الخارجية:** الربط التام والمباشر مع نظام **Microtek** المالي لضمان تماسك ومطابقة القيود المحاسبية.\n\nسيعمل النظام كمنظومة **مونوث نمطي (Modular Monolith)** باستخدام بيئة العمل **Laravel** كواجهة برمجة تطبيقات (API) في الخلفية، و**Vue.js** مع متجر **Pinia** لإدارة الحالة في الواجهة الأمامية، لتوفير تجربة مستخدم ديناميكية وتكاملية ممتازة مع الحفاظ على استقلالية موديولات النظام.\n\n---\n\n### 2. قاموس المصطلحات البرمجية والتجارية (Domain Glossary)\n\nيضم الجدول التالي جميع المصطلحات التشغيلية والفنية المعتمدة في النظام استناداً إلى الوثائق الرسمية ومحاضر الاجتماعات الفنية لمختبر رامسسكو:\n\n| المصطلح بالعربية | المصطلح بالإنجليزية | الاختصار | التعريف الفني والتجاري في النظام |\n| :--- | :--- | :--- | :--- |\n| **جسّة** | Borehole | **BH** | حفرة رأسية يتم حفرها في التربة لأعماق مختلفة للحصول على عينات وتحديد خصائص التربة وتصنيف طبقاتها الجيولوجية. |\n| **جسّة استكشافية** | Exploratory Borehole | **-** | نوع من الجسات يُنفذ لتحديد الخصائص والمواصفات العامة والمبدئية للتربة ومستوى المياه الجوفية في الموقع. |\n| **كارت تفاصيل الجسة** | Borehole Detail Card | **-** | بطاقة رقمية موحدة في النظام تسجل البيانات الأساسية للجسّة (اسم المشروع، اسم العميل، رقم المشروع، الموقع الجغرافي). |\n| **أمر الشغل** | Work Order | **WO** | مستند رسمي نظامي يصدر تلقائياً فور موافقة العميل الموثقة على عرض السعر والاعتماد المالي لبدء التنفيذ الميداني والمعملي. |\n| **اختبار الكثافة الحقلية** | Field Density Test | **FDT** | اختبار ميداني لتحديد كثافة التربة الجافة ودرجة الدمك في الموقع طبقاً للمواصفة **ASTM D1556** باستخدام طريقة مخروط الرمل. |\n| **طريقة مخروط الرمل** | Sand Cone Method | **-** | آلية الفحص الميداني المعتمدة لقياس كثافة التربة الطبيعية عبر حفر حفرة قياسية وتعبئتها برمل فحص معير. |\n| **اختبار الدمك** | Compaction / Proctor Test | **PRT** | اختبار معملي يحدد العلاقة بين محتوى الرطوبة والكثافة الجافة للتربة للوصول لأقصى دمك جاف ممكن طبقاً للمواصفة **ASTM D1557**. |\n| **درجة الدمك المطلوبة** | Compaction Percentage | **-** | نسبة الكثافة الجافة الحقلية إلى الكثافة الجافة المعملية القصوى، ويشترط النظام لنجاح الاختبار أن تكون النتيجة **أكبر من 95% (> 95%)**. |\n| **اختبار الهبوط** | Slump Test | **-** | اختبار ميداني للخرسانة الطازجة لتحديد قوامها ومدى سهولة تشغيلها، وتسجل بياناته في شيت \"ملاحظات صب الخرسانة\". |\n| **اختبار تكسير الخرسانة** | Compressive Strength Test | **CST** | اختبار معملي لقياس مقاومة الضغط للمكعبات الخرسانية بعد غمرها في الماء لمعرفة مدى تحملها للأحمال الإنشائية. |\n| **حوض المعالجة** | Curing Tank | **-** | حوض مائي معالج معملياً تُحفظ فيه المكعبات الخرسانية بعد الصب لمدد زمنية محددة (7 أيام و28 يوماً) قبل اختبار الكسر. |\n| **نسبة نجاح تكسير الخرسانة** | Concrete Success Rate | **-** | نسبة المقاومة المحققة مقارنة بالمقاومة التصميمية المستهدفة، ويشترط النظام ألا تقل النتيجة عن **75% كحد أدنى** للنجاح. |\n| **اختبار القلب الخرساني** | Core Test | **CRT** | اختبار شبه متلف يتم بأخذ عينة أسطوانية (قلب خرساني) من العناصر الإنشائية المتصلدة بالموقع وفحصها بالمعمل لتحديد مقاومتها الفعلية. |\n| **مطرقة شميدت** | Schmidt Hammer Test | **SHT** | اختبار غير متلف لتحديد صلابة السطح للخرسانة المتصلدة وتقدير مقاومتها للضغط في الموقع بشكل تقريبي سريع. |\n| **اختبار لوح التحميل** | Plate Loading Test | **PLT** | اختبار ميداني مستقل يُجرى لتقدير قدرة تحمل التربة التصميمية ومقدار الهبوط المتوقع تحت أحمال التأسيس، وله تقرير منفصل. |\n| **معاملة زيارة للموقع** | Site Visit | **VST** | معاملة نظامية لتوثيق انتقال مهندس أو فني للموقع لإجراء معاينات سريعة أو تقديم استشارات ميدانية دون حفر أو اختبارات معقدة. |\n| **حفر اختبارية** | Trial Pit Report | **TPR** | حفر مكشوفة يتم تنفيذها يدوياً أو ميكانيكياً لأعماق ضحلة لمعاينة وتوصيف طبقات التربة السطحية وأخذ عينات مقلقلة. |\n| **اختبار المقاومة الكهربائية** | Electrical Resistivity Test | **ERT** | اختبار معملي أو ميداني لقياس مقاومة التربة لمرور التيار الكهربائي، ويستخدم في تصميم شبكات التأريض الكهربائي للمنشآت. |\n| **اختبار تصنيف التربة** | Classification Test | **CLT** | مجموعة اختبارات معملية (كالتدرج الحبيبي وحدود اتربرج) لتحديد التركيب الميكانيكية للتربة وتصنيفها الهندسي. |\n| **حدود اتربرج** | Atterberg Limits Test | **ALT** | اختبار معملي لتحديد محتوى الرطوبة الفاصل بين حالات القوام المختلفة (الصلبة، شبه الصلبة، اللدنة، السائلة) للتربة الناعمة. |\n| **عمل فتحة بالكور للجسات** | Hole Core Drilling | **HOL** | عملية ثقب أو قطع خرساني أو أسفلتي لتمكين معدة الحفر من النفاذ وتنفيذ الجسة الاستكشافية في الأماكن المغطاة بالخرسانة/الأسفلت. |\n| **شيت الاختبارات** | Test Sheet | **-** | نموذج إدخال البيانات الرقمي داخل النظام لتسجيل أوزان ونتائج الفحص والكسر وأبعاد العينات بدقة تامة. |\n| **تذكرة المعاملة** | Transaction Ticket | **-** | الكيان البرمجي الممثل للمعاملة المالية والإدارية داخل النظام، والتي تُنشأ تلقائياً عند إصدار عرض السعر وتكون حالتها الأولية \"معلقة\". |\n| **المعاملة المعلقة** | Pending Transaction | **-** | حالة المعاملة التي تم إصدار عرض سعر لها وبانتظار موافقة العميل وتوقيعه والتحصيل المالي، وتظهر في شاشة ملونة مخصصة للمتابعة. |\n| **التوقيع الإلكتروني الممسوح** | Scanned Electronic Signature | **-** | ملف صورة لتوقيع العميل الفعلي المعتمد، يتم رفع للنظام للتثبت القانوني من موافقته على عرض السعر وأمر الشغل. |\n| **دفعة التأمين المقدمة** | Upfront Deposit / Advance | **-** | مبلغ مالي يمثل **50% من القيمة الإجمالية** لعرض السعر، يشترط النظام تحصيله والتأكد منه محاسبياً لبدء أي عمل تشغيلي. |\n\n---\n\n### 3. الهيكل التنظيمي وصلاحيات النظام (Organizational Structure & RBAC Mapping)\n\nتم استخلاص الهيكل الإداري والتشغيلي بالكامل من سجلات شؤون الموظفين الرسمية لمختبر رامسسكو وتعيينها إلى أدوار برمجية محددة بصلاحيات مستندة إلى الأدوار (Role-Based Access Control - RBAC) داخل النظام:\n\n```mermaid\ngraph TD\n    %% Executive Level\n    subgraph Executive [\"الادارة العليا\"]\n        GM[\"المدير العام: أحمد فؤاد\"]\n        EM[\"المدير التنفيذي: محمود فؤاد\"]\n    end\n\n    %% Finance & Admin\n    subgraph FinanceAdmin [\"الادارة المالية والإدارية - مديرها: محمد خالد\"]\n        CostAcc[\"محاسب التكاليف: علي شعيب\"]\n        SalesAcc[\"محاسب المبيعات: محمد عبد الحكيم\"]\n        ExpAcc[\"محاسب المصروفات: محمد جمال\"]\n        DevSpec[\"أخصائي تطوير: ريم محمد\"]\n        OrgSpec[\"أخصائي تنظيم: أسماء عبد العزيز\"]\n        AdminSpec[\"أخصائي إداري: نورة جابر / ربي عبد الله\"]\n        Worker[\"عامل: رقيب حسن\"]\n    end\n\n    %% HR Dept\n    subgraph HRDept [\"إدارة الموارد البشرية - مديرها: محمد سليم\"]\n        HRSpec[\"أخصائية موارد بشرية: ليلى صالح\"]\n    end\n\n    %% Lab Dept\n    subgraph LabDept [\"إدارة المختبر - مديرها: عمار السباعي\"]\n        LabTechs[\"فنيو المختبر:\\nمدثر خالد، أحمد السيد، عبد الرحمن سلطان،\\nعبد المطلب محمود، أحمد حسن، خان جيهان\"]\n        LabPurchase[\"فني مشتريات عامة وأدوات مختبر\"]\n    end\n\n    %% Operations Dept\n    subgraph OpsDept [\"إدارة التشغيل - مديرها: أحمد الدقيشي\"]\n        TechDir[\"المدير الفني: محمد عبد الحميد\"]\n        GeotechOps[\"مهندس جيوتكنكال تشغيل:\\nمروان مصطفى / أسماء محمد\"]\n        CivilGeotech[\"مهندس مدني جيوتكنكال:\\nيوسف الجنايني / محمد فتحي\"]\n        Geologist[\"مهندس جيولوجي:\\nأحمد سليمان\"]\n        \n        %% Drilling Teams\n        subgraph Drilling [\"قسم الحفر الميداني\"]\n            DrillTech1[\"فريق 1:\\nفني: مسعد فوزي\\nمساعد: محمد كامل\"]\n            DrillTech2[\"فريق 2:\\nفني: صلاح صبحي\\nمساعد: سعيد عبد المنعم\"]\n            DrillTech3[\"فريق 3:\\nفني: صلاح محمد\\nمساعد: محمد ناصر\"]\n            DrillPurchase[\"فني مشتريات معدات حفر\"]\n        end\n    end\n\n    %% Independent\n    Consultant[\"مهندس استشاري:\\nد / إسلام أحمد\"]\n    SalesEng[\"مهندس مبيعات:\\nأنس خيرت\"]\n\n    %% Hierarchy Links\n    GM --> EM\n    EM --> FinanceAdmin\n    EM --> HRDept\n    EM --> LabDept\n    EM --> OpsDept\n    EM --> Consultant\n    EM --> SalesEng\n    OpsDept --> Drilling\n```\n\n#### جدول توزيع الصلاحيات والأدوار البرمجية (RBAC Roles & Permissions)\n\nتتوزع الصلاحيات البرمجية بشكل صارم لمنع تداخل الاختصاصات وضمان حوكمة البيانات والامتثال لمعيار ISO 17025:\n\n| الدور الوظيفي بالنظام | المسؤول الفعلي (الاسم) | الصلاحيات البرمجية الرئيسية (System Permissions) |\n| :--- | :--- | :--- |\n| **Super Administrator / الإدارة العليا** | أحمد فؤاد / محمود فؤاد | - تحكم كامل بإعدادات النظام والمستخدمين والتهيئة الفنية.<br>- اعتماد الخصومات المالية الاستثنائية والتقارير النهائية.<br>- الاطلاع على لوحات التحكم والتقارير المالية والتشغيلية الموحدة. |\n| **Financial Manager / مدير الحسابات** | محمد خالد | - اعتماد عروض الأسعار الصادرة مالياً وتعديل هيكل التسعير بالبلديات (الرياض/الدمام).<br>- إحالة المعاملات والمراجعة المالية للفواتير.<br>- تكامل الحسابات مع نظام Microtek المالي. |\n| **Sales Accountant / محاسب المبيعات** | محمد عبد الحكيم | - مراجعة التحويلات البنكية ومطابقة صور إيصالات الدفع.<br>- تسجيل الدفعة المقدمة (50%) كشرط لبدء أمر الشغل.<br>- إصدار الفواتير الضريبية وتطبيق الخصومات المعول عليها. |\n| **Cost Accountant / محاسب التكاليف** | علي شعيب | - إدخال ومراقبة التكاليف المباشرة والغير مباشرة للمشاريع والجسات.<br>- حساب تكلفة الوقود، والمواد المستهلكة، وقطع الغيار. |\n| **HR Manager / مدير الموارد البشرية** | محمد سليم / ليلى صالح | - إنشاء ملفات الموظفين وإدارة وتفعيل الدوام (ورديات / دوام كامل).<br>- إدارة الأجندة الإدارية (Calendar & Emp Action) وتصنيف الوظائف.<br>- متابعة الحضور والانصراف، وطلبات الإجازات، وتقييم أداء الموظفين. |\n| **Operations Manager / مدير التشغيل** | أحمد الدقيشي | - تحويل المعاملات المعتمدة مالياً إلى المهندسين المختصين.<br>- تعيين الفرق الحقلية وتوزيع جدول وجداول التنفيذ الزمني.<br>- إدارة موديول الحفارات والمركبات وتكليف الأطقم الميدانية. |\n| **Technical Director / المدير الفني** | محمد عبد الحميد | - الإشراف الهندسي العام على جودة التقارير الصادرة والامتثال للأكواد الكود السعودي للتربة.<br>- الاعتماد الهندسي الفني النهائي لتقارير الجسات الجيوتقنية قبل التصدير للعميل. |\n| **Geotechnical Engineer / مهندس جيوتقني** | مروان مصطفى / أسماء محمد / يوسف الجنايني / محمد فتحي | - دراسة وتحديد أنواع التقارير المطلوبة في مرحلة التقييم (Assessment).<br>- إعداد التوصيات الهندسية للتأسيس وتحديد قدرة تحمل التربة التصميمية.<br>- مراجعة وتدقيق نتائج الفحوصات المعملية والميدانية (FDT, Slump Test, Plate Load Test). |\n| **Geological Engineer / مهندس جيولوجي** | أحمد سليمان | - استلام وتصنيف عينات التربة ميدانياً وتصويرها وتوثيق إحداثياتها وأعماقها بدقة.<br>- إرسال العينات والنتائج الفنية الأولية لمجموعة التجهيز والتقارير بالمعمل. |\n| **Lab Manager / مدير المختبر** | عمار السباعي | - إدارة وتوزيع العينات المستلمة على فنيي المختبر.<br>- المصادقة الفنية على نتائج شيتات الاختبارات المدخلة.<br>- تفعيل إجراءات إعادة الاختبار في حال كانت النتائج غير مطابقة لمعايير النجاح (مثل دمك أقل من 95%). |\n| **Lab Technician / فني المختبر** | مدثر خالد / أحمد السيد / عبد الرحمن سلطان / عبد المطلب محمود / أحمد حسن / خان جيهان | - إجراء الفحوصات المعملية والميدانية للخرسانة والتربة.<br>- تسجيل قراءات أبعاد المكعبات الخرسانية وأوزانها وإدخال نتائج كسر العينات في \"شيت الاختبارات\". |\n| **Driller / فني حفار** | مسعد فوزي / صلاح صبحي / صلاح محمد | - واجهة تطبيق الهاتف (Mobile APP): تأكيد استلام المركبة، تسجيل فحص السائق والسيارة.<br>- توثيق عمليات الحفر الميداني والرفع اللحظي لإحداثيات الجسة والصور والتوقيت. |\n| **Sales Engineer / مهندس المبيعات** | أنس خيرت | - إدخال بيانات العملاء والفرص البيعية على نظام CRM.<br>- إعداد وإصدار مسودات عروض الأسعار، وإرسالها للعميل ومتابعة الحصول على التوقيع الإلكتروني الممسوح. |\n| **Consultant Engineer / مهندس استشاري** | د / إسلام أحمد | - مراجعة المشاريع الكبرى والمعقدة استشارياً، والمصادقة على التوصيات الهندسية الخاصة بالتأسيس. |\n"
+    },
+    {
+        "name": "01. بنية النظام والحدود المعمارية",
+        "filename": "01_System_Architecture_and_Boundaries.md",
+        "content": "# المخطط الفني والتجاري لنظام رامسسكو (Ramssko Lab ERP/LIMS)\n## الجزء الثاني: بنية النظام والحدود المعمارية\n**الملف:** `01_System_Architecture_and_Boundaries.md`\n\n---\n\n### 1. الفلسفة المعمارية للنظام (Architectural Philosophy)\n\nيتبع تصميم نظام **رامسسكو الموحد** نمط **المونوث النمطي (Modular Monolith)**، وهي بنية معمارية تجمع بين سهولة النشر والتطوير للمونوث التقليدي، وقوة الفصل المعماري واستقلالية الموديولات التي تتميز بها الخدمات المصغرة (Microservices). \n\n#### الخلفية البرمجية (Backend - Laravel API):\n* **الهيكلية النمطية:** يتم تنظيم الكود البرمجي في مجلدات مستقلة تماماً للموديولات داخل مجلد `app/Modules`. كل موديول (مثل `CoreLab`, `Finance`, `HR`) يمثل وحدة معزولة تحتوي على نماذج البيانات الخاصة بها (`Models`)، ومنطق العمل (`Actions/Services`)، والمتحكمات (`Controllers`)، والمسارات (`Routes`).\n* **عزل قواعد البيانات وقنوات الاتصال:** تتبع الكيانات والبيانات تبعية صارمة للموديول المالك لها. لا يُسمح لموديول بالاستعلام المباشر من جداول موديول آخر. بدلاً من ذلك، يتم الاتصال البيني عبر:\n  1. **واجهات الخدمات (Service Interfaces):** عقود برمجية معرفة بشكل واضح للنداءات المتزامنة.\n  2. **الأحداث والمستمعين (Event Listeners / Observers):** للاتصال غير المتزامن وسير العمل الأحادي (مثال: إطلاق حدث `BoreholeWorkOrderApproved` في موديول التشغيل يقوم موديول المالية بالاستماع إليه لتهيئة التذكرة تلقائياً).\n\n#### الواجهة الأمامية (Frontend - Vue.js & Pinia):\n* **الهيكلية النمطية بالواجهة:** تُقسم الواجهات في Vue.js بالتوازي مع تقسيم الخلفية. يمتلك كل موديول مجلداً خاصاً به يحتوي على المكونات (`Components`)، والمشاهد (`Views`)، ومخازن الحالات المخصصة (`Pinia Stores` مثل `useCoreLabStore`, `useFinanceStore`).\n* **إدارة الحالة:** يعمل متجر Pinia كمستودع مركزي لحالة الواجهة لكل موديول، مما يمنع التداخل التشغيلي للبيانات ويضمن تحديث البيانات في لوحة التحكم بشكل لحظي وديناميكي.\n\n---\n\n### 2. مصفوفة حدود الموديولات (Module Boundaries Matrix)\n\nيوضح الجدول التالي ما يقع **داخل** حدود كل موديول (مسؤولياته المباشرة) وما يقع **خارجه** (الاعتمادات والتكاملات مع الموديولات الأخرى):\n\n| الموديول البرمجي | ما يقع داخل حدود الموديول (Inside Boundary) | ما يقع خارج حدود الموديول (Outside Boundary) |\n| :--- | :--- | :--- |\n| **1. إدارة المختبر والعمليات الميدانية**<br>*(Core Lab & Field)* | - تسجيل بيانات الجسات وأعماقها الميدانية.<br>- إدارة استلام عينات التربة والخرسانة وتوثيق صورها.<br>- شيتات إدخال نتائج اختبارات (FDT, الدمك, الكسر, الهبوط).<br>- تطبيق الأكواد الفنية وإصدار التقارير الجيوتقنية والفنية. | - محاسبة تكاليف الجسات والتحصيل المالي (Finance).<br>- إدارة الحفارات كأصول ثابتة وتراخيصها (Assets).<br>- عقود المبيعات وتوقيعات العملاء (CRM).<br>- حضور وانصراف فنيي الحفر والمختبر (HR). |\n| **2. الموارد البشرية**<br>*(HR Module)* | - إدارة ملفات وبيانات الموظفين ومسمياتهم.<br>- معالجة شؤون الموظفين (Calendar & Emp Action).<br>- تسجيل الحضور والانصراف وإدارة الإجازات.<br>- تفعيل نوع الدوام (ورديات / دوام كامل) وتقييم الأداء. | - صرف العهد المالية ومصروفات الحفارات (Finance).<br>- توزيع المهام اليومية للفرق في الموقع (Core Lab).<br>- تسجيل وتتبع المركبات والسيارات المستلمة (Assets). |\n| **3. التسويق وعلاقات العملاء**<br>*(Marketing & CRM)* | - تسجيل بيانات العملاء الجدد والفرص البيعية.<br>- إعداد مسودات عروض الأسعار وحفظها للفرص.<br>- متابعة عروض السعر والحصول على توقيع العميل الإلكتروني.<br>- تنظيم الحملات التسويقية والاتصال الأولي بالعميل. | - تسعير الجسات والتحقق من حسابات البلديات (Finance).<br>- جدولة بدء العمل الميداني وإرسال الحفارات (Core Lab).<br>- دفع العميل عبر الموقع أو التحويل البنكي (Finance). |\n| **4. التذاكر وبوابات الويب والموبايل**<br>*(Web/Mobile & Ticketing)* | - شاشة العرض الملونة لمتابعة المعاملات المعلقة.<br>- استقبال طلبات وتذاكر العملاء عبر بوابات الويب.<br>- واجهة الموبايل لرفع صور الجسات والإحداثيات لحظياً.<br>- واجهة الموبايل للحفارين والسائقين لفحص المركبة. | - منطق حساب أعداد الجسات بناءً على المساحة (Core Lab).<br>- مطابقة التحويلات البنكية محاسبياً (Finance).<br>- سجلات الصيانة الوقائية والطارئة للمركبات (Calibration). |\n| **5. الصيانة والمعايرة**<br>*(Calibration & Maintenance)* | - جدولة وضبط تواريخ معايرة أجهزة الفحص والكسر.<br>- تسجيل عمليات صيانة الحفارات والسيارات والمعدات.<br>- إشعارات وتنبيهات مواعيد المعايرة والصيانة الدورية. | - إهلاك الأصول محاسبياً وإضافتها الدفترية (Fixed Assets).<br>- شراء قطع الغيار أو مستهلكات المعمل (Stock).<br>- تكليف الفني بالعمل الميداني (Core Lab). |\n| **6. الأصول الثابتة والمخازن**<br>*(Fixed Assets & Stock)* | - سجل الأصول الثابتة (الحفارات، أجهزة المعمل، السيارات).<br>- ملف المركبات الشامل وتواريخ التراخيص والفحص.<br>- سجل استلام المركبات وتوقيع المستلمين.<br>- إدارة المخزون وقطع الغيار وأدوات المختبر والمستلزمات. | - معالجة الصيانة الفعلية للمركبات (Calibration).<br>- حساب تكلفة استهلاك الوقود والمصروفات (Finance).<br>- حضور سائقي ومساعدي الحفارات (HR). |\n| **7. المالية ودفتر الأستاذ العام**<br>*(Finance & GL)* | - دليل الحسابات وقيد اليومية العامة والميزانية.<br>- مراجعة الأسعار وإصدار الفواتير الضريبية النهائية.<br>- مطابقة التحويلات المالية وتأمين الـ 50% دفعة مقدمة.<br>- تكامل الضرائب والفواتير الإلكترونية مع هيئة ZATCA. | - إدخال القراءات الفنية للاختبارات ومراجعتها (Core Lab).<br>- إرفاق مستندات التحويل البنكي من العميل (Web/Ticket).<br>- جمع بيانات أبعاد المشاريع مبدئياً (CRM). |\n\n---\n\n### 3. ملكية البيانات والكيانات (Data & Entity Ownership)\n\nيحدد النموذج التالي بدقة الموديول المالك لكل كيان برمجي (Entity Ownership) داخل قاعدة البيانات الموحدة لمنع التداخل البرمجي ولضمان سلامة حوكمة البيانات:\n\n```mermaid\nflowchart TD\n    %% Define Styles\n    classDef moduleStyle fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#93c5fd,font-weight:bold;\n    classDef entityStyle fill:#1e293b,stroke:#475569,stroke-width:1.5px,color:#cbd5e1;\n\n    subgraph CRM [\"موديول علاقات العملاء CRM\"]\n        CRM_M[\"إدارة جهات الاتصال والمبيعات\"]:::moduleStyle\n        E_Cust[\"Customer\\n(العميل)\"]:::entityStyle\n        E_Lead[\"Lead\\n(الفرصة البيعية)\"]:::entityStyle\n        E_Quote[\"Quotation\\n(عرض السعر)\"]:::entityStyle\n        CRM_M --- E_Cust & E_Lead & E_Quote\n    end\n\n    subgraph Tickets [\"موديول التذاكر وبوابات الويب\"]\n        Tick_M[\"إدارة المعاملات والدعم\"]:::moduleStyle\n        E_Ticket[\"TransactionTicket\\n(تذكرة المعاملة)\"]:::entityStyle\n        E_CTicket[\"ClientTicket\\n(تذكرة الطلبات)\"]:::entityStyle\n        E_File[\"FileScan\\n(المستندات الممسوحة)\"]:::entityStyle\n        Tick_M --- E_Ticket & E_CTicket & E_File\n    end\n\n    subgraph Lab [\"موديول العمليات والمختبر Core Lab\"]\n        Lab_M[\"إدارة الفحوصات والتقارير\"]:::moduleStyle\n        E_BH[\"Borehole (الجسّة)\"]:::entityStyle\n        E_SS[\"SoilSample (عينة التربة)\"]:::entityStyle\n        E_CS[\"ConcreteSample (عينة الخرسانة)\"]:::entityStyle\n        E_TR[\"TestResult (نتيجة الاختبار)\"]:::entityStyle\n        E_SL[\"SlumpLog (سجل الهبوط)\"]:::entityStyle\n        E_CR[\"CompactionReport (تقرير الدمك)\"]:::entityStyle\n        E_GR[\"GeotechnicalReport (التقرير النهائي)\"]:::entityStyle\n        Lab_M --- E_BH & E_SS & E_CS & E_TR & E_SL & E_CR & E_GR\n    end\n\n    subgraph HR [\"موديول الموارد البشرية HR\"]\n        HR_M[\"إدارة الموظفين والدوام\"]:::moduleStyle\n        E_Emp[\"Employee (الموظف)\"]:::entityStyle\n        E_Att[\"Attendance (الحضور والانصراف)\"]:::entityStyle\n        E_Leave[\"LeaveRequest (طلب الإجازة)\"]:::entityStyle\n        E_Shift[\"WorkShift (الوردية/الدوام)\"]:::entityStyle\n        E_Eval[\"EvaluationTask (مهمة التقييم)\"]:::entityStyle\n        HR_M --- E_Emp & E_Att & E_Leave & E_Shift & E_Eval\n    end\n\n    subgraph Assets [\"موديول الأصول والمستودعات Assets & Stock\"]\n        Asset_M[\"إدارة المركبات والقطع\"]:::moduleStyle\n        E_Asset[\"FixedAsset (الأصل الثابت)\"]:::entityStyle\n        E_Veh[\"VehicleDetail (ملف المركبة)\"]:::entityStyle\n        E_VehHO[\"VehicleHandover (سجل الاستلام)\"]:::entityStyle\n        E_Item[\"StockItem (مادة مخزنية)\"]:::entityStyle\n        E_InvTx[\"InventoryTransaction (حركة مخزنية)\"]:::entityStyle\n        Asset_M --- E_Asset & E_Veh & E_VehHO & E_Item & E_InvTx\n    end\n\n    subgraph Calib [\"موديول الصيانة والمعايرة Calibration\"]\n        Cal_M[\"إدارة صيانة ومعايرة المعدات\"]:::moduleStyle\n        E_Maint[\"MaintenanceLog (سجل الصيانة)\"]:::entityStyle\n        E_CalRec[\"CalibrationRecord (سجل المعايرة)\"]:::entityStyle\n        Cal_M --- E_Maint & E_CalRec\n    end\n\n    subgraph Finance [\"موديول المالية Finance & GL\"]\n        Fin_M[\"إدارة القيود والربط والفوترة\"]:::moduleStyle\n        E_Inv[\"Invoice (الفاتورة الضريبية)\"]:::entityStyle\n        E_Rcpt[\"PaymentReceipt (سند القبض)\"]:::entityStyle\n        E_JE[\"JournalEntry (قيد اليومية)\"]:::entityStyle\n        E_Tax[\"TaxSetting (إعدادات الضريبة)\"]:::entityStyle\n        Fin_M --- E_Inv & E_Rcpt & E_JE & E_Tax\n    end\n\n    %% Styles for subgraphs\n    style CRM fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;\n    style Tickets fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;\n    style Lab fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;\n    style HR fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;\n    style Assets fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;\n    style Calib fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;\n    style Finance fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;\n```\n\n---\n\n### 4. مخطط سياق النظام والربط الخارجي (Mermaid.js C4 Context Diagram)\n\nيوضح المخطط التالي سياق النظام العام (**Ramssko Lab System**) وتفاعله مع المستخدمين المختلفين، بالإضافة إلى قنوات الربط الإلكتروني المباشر مع الأنظمة الحكومية والبرمجيات الخارجية والخدمات السحابية:\n\n```mermaid\nflowchart TB\n    %% Styling Definition\n    classDef userStyle fill:#1e3a8a,stroke:#172554,stroke-width:2px,color:#ffffff;\n    classDef systemStyle fill:#0f172a,stroke:#1e293b,stroke-width:3px,color:#ffffff;\n    classDef moduleStyle fill:#eff6ff,stroke:#2563eb,stroke-width:2px,color:#1e40af;\n    classDef extStyle fill:#fff5f5,stroke:#ef4444,stroke-width:2px,color:#991b1b;\n\n    %% Users & Actors\n    subgraph Users [\"المستفيدون من النظام\"]\n        Client[\"العميل النهائي\\n(Client)\\n[بوابة الويب / تطبيق الهاتف]\"]:::userStyle\n        OfficeStaff[\"موظفو الإدارة والمبيعات\\n(Office Staff)\\n[لوحة التحكم بالمتصفح]\"]:::userStyle\n        LabStaff[\"فنيو ومدير المختبر\\n(Lab Staff)\\n[شاشة شيت الاختبارات]\"]:::userStyle\n        FieldTeam[\"فريق الحفر والمهندسين الجيولوجيين\\n(Field Drillers & Geologists)\\n[تطبيق الهاتف المحمول]\"]:::userStyle\n    end\n\n    %% Internal System (Modular Monolith)\n    subgraph SystemBoundary [\"نظام رامسسكو الموحد (Ramssko Lab ERP/LIMS)\"]\n        direction TB\n        ERP_Core[\"بوابة النظام والواجهة الخلفية الموحدة\\n(Laravel Core API & Vue.js Dashboard)\"]:::systemStyle\n\n        subgraph Modules [\"الموديولات البرمجية المعزولة (Laravel Modules)\"]\n            M_CoreLab[\"إدارة المختبر والعمليات الميدانية\\n(Core Lab & Field Operations)\"]:::moduleStyle\n            M_HR[\"إدارة الموارد البشرية\\n(Human Resources & Calendar)\"]:::moduleStyle\n            M_CRM[\"التسويق وعلاقات العملاء\\n(Marketing & CRM)\"]:::moduleStyle\n            M_Ticketing[\"بوابة التذاكر والمعاملات المعلقة\\n(Ticketing & Statuses)\"]:::moduleStyle\n            M_Calibration[\"الصيانة والمعايرة للأجهزة والأصول\\n(Calibration & Maintenance)\"]:::moduleStyle\n            M_Assets[\"الأصول الثابتة والمخازن\\n(Fixed Assets & Stock)\"]:::moduleStyle\n            M_Finance[\"الإدارة المالية ودفتر الأستاذ العام\\n(Finance & GL)\"]:::moduleStyle\n        end\n    end\n\n    %% External Systems & Integrations\n    subgraph ExternalSystems [\"الأنظمة الخارجية والربط الحكومي\"]\n        ZATCA[\"هيئة الزكاة والضريبة والجمارك (ZATCA)\\n[الفاتورة الإلكترونية والمرحلة الثانية]\"]:::extStyle\n        Microtek[\"نظام Microtek المالي\\n[مزامنة القيود والحسابات الختامية]\"]:::extStyle\n        GoogleMaps[\"خدمة خرائط جوجل (Google Maps API)\\n[التوثيق الجغرافي وتقييم مواقع الجسات]\"]:::extStyle\n    end\n\n    %% Interactions and Connections\n    %% Users to Dashboard/Apps\n    Client -->|إنشاء معاملة، تتبع التقارير، سداد الدفعات| ERP_Core\n    OfficeStaff -->|إدارة الحسابات، المبيعات، شؤون الموظفين| ERP_Core\n    LabStaff -->|إدخال نتائج تكسير الخرسانة والدمك| ERP_Core\n    FieldTeam -->|تسجيل استلام السيارة، رفع إحداثيات الجسات| ERP_Core\n\n    %% Dashboard routes to specific Modules\n    ERP_Core --> M_Ticketing\n    ERP_Core --> M_CRM\n    ERP_Core --> M_CoreLab\n    ERP_Core --> M_Finance\n    ERP_Core --> M_HR\n    ERP_Core --> M_Assets\n    ERP_Core --> M_Calibration\n\n    %% Module to Module Internal Interaction examples (via Events/Interfaces)\n    M_CRM -.->|تحويل موافقة العميل والتوقيع| M_CoreLab\n    M_CoreLab -.->|إرسال عينات التربة والخرسانة| M_Ticketing\n    M_Ticketing -.->|إنشاء معاملة معلقة ملونة| M_Finance\n    M_Finance -.->|تأكيد تحصيل 50% مقدم| M_CoreLab\n    M_Assets -.->|توفير بيانات الحفارات والسيارات| M_Calibration\n    M_Calibration -.->|إرسال إشعارات تنبيهات الصيانة| M_HR\n\n    %% Module to External integrations\n    M_Finance ===>|إرسال الفواتير والضريبة إلكترونياً| ZATCA\n    M_Finance ===>|مزامنة الحركات والقيود المالية| Microtek\n    M_CoreLab ===>|تحديد وتوثيق إحداثيات الموقع الفعلي| GoogleMaps\n"
+    },
+    {
+        "name": "02. دورات عمل الكيانات ودورات الحياة",
+        "filename": "02_Business_Workflows_and_Lifecycles.md",
+        "content": "# المخطط الفني والتجاري لنظام رامسسكو (Ramssko Lab ERP/LIMS)\n## الجزء الثالث: دورات عمل الكيانات ودورات الحياة\n**الملف:** `02_Business_Workflows_and_Lifecycles.md`\n\n---\n\n### 1. دورة حياة الجسة الاستكشافية (Borehole Lifecycle)\n\nتبدأ دورة حياة الجسة الاستكشافية من الاتصال الأولي بالعميل وتنتهي بتسليم التقرير الجيوتقني وإغلاق المعاملة مالياً، وتتكون من المراحل المتسلسلة التالية:\n\n```mermaid\nflowchart TD\n    %% Define Styles for visual excellence\n    classDef stageStyle fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#60a5fa,font-weight:bold;\n    classDef stepStyle fill:#1e293b,stroke:#475569,stroke-width:1.5px,color:#cbd5e1;\n    \n    subgraph Stage1 [\"المرحلة الأولى: الاتصال والتعاقد المالي\"]\n        direction LR\n        A[\"استفسار العميل المبدئي\"]:::stepStyle --> B[\"حساب التسعير تلقائياً بالنظام\"]:::stepStyle\n        B --> C[\"إصدار عرض السعر برقم مرجع\"]:::stepStyle\n        C --> D[\"الموافقة والتوقيع الإلكتروني للعميل\"]:::stepStyle\n        D --> E[\"تحصيل دفعة التأمين المقدمة 50%\"]:::stepStyle\n    end\n    \n    subgraph Stage2 [\"المرحلة الثانية: التجهيز والتنفيذ الميداني\"]\n        direction LR\n        F[\"توليد أمر الشغل WO\"]:::stepStyle --> G[\"تجهيز الموقع وجدولة الفرق\"]:::stepStyle\n        G --> H[\"حفر الجسات واستخراج العينات\"]:::stepStyle\n        H --> I[\"التصوير الميداني وتوثيق الـ GPS\"]:::stepStyle\n    end\n    \n    subgraph Stage3 [\"المرحلة الثالثة: الفحص والاختبار المعملي\"]\n        direction LR\n        J[\"شحن وإرسال العينات للمعمل\"]:::stepStyle --> K[\"إجراء الاختبارات والتحليل الفني\"]:::stepStyle\n        K --> L[\"تسجيل القراءات في شيت الاختبارات\"]:::stepStyle\n        L --> M[\"المراجعة الفنية والاعتماد الهندسي\"]:::stepStyle\n    end\n    \n    subgraph Stage4 [\"المرحلة الرابعة: الإنهاء المالي والتسليم\"]\n        direction LR\n        N[\"الفوترة وتسوية التكاليف الفعلية\"]:::stepStyle --> O[\"تحصيل الدفعة المتبقية 50%\"]:::stepStyle\n        O --> P[\"إرسال التقرير النهائي المعتمد\"]:::stepStyle\n        P --> Q[\"التوثيق الجغرافي برابط Google Maps\"]:::stepStyle\n    end\n\n    %% Inter-stage connections\n    E --> F\n    I --> J\n    M --> N\n    \n    %% Apply general graph styles\n    style Stage1 fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;\n    style Stage2 fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;\n    style Stage3 fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;\n    style Stage4 fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;\n```\n\n1. **الاستفسار والتقييم (Inquiry & Assessment):**\n   * يقوم مهندس المبيعات بإدخال مواصفات المبنى (نوع المبنى: سكني/تجاري، مساحة الأرض الكلية، وعدد الأدوار).\n   * يقوم النظام تلقائياً بتحديد عدد الجسات المطلوبة كحد أدنى بناءً على كود البناء السعودي (مثال: مساحة 200-300 متر مربع تتطلب 3 جسات كحد أدنى).\n\n2. **عرض السعر المالي (Quotation Stage):**\n   * يُنشئ النظام عرض سعر رسمي برقم مرجعي فريد يتخذ التنسيق التلقائي (مثال: `RAM-D-F-2606153`).\n   * يتم تسعير الجسة أو سعر المتر بناءً على نطاق عمل البلدية المعتمدة (الرياض أو الدمام) وعمق الجسات المطلوب.\n   * يُرسل عرض السعر تلقائياً للعميل عبر البريد الإلكتروني أو الواتساب، وتتحول حالة المعاملة في لوحة التحكم إلى \"معلقة\" مع توليد تذكرة (Ticket) ملونة.\n\n3. **الاعتماد والتوقيع (Customer Approval & Signing):**\n   * يعتمد العميل عرض السعر برفع توقيعه الإلكتروني الممسوح ضوئياً (Scanned Electronic Signature) عبر بوابة العميل الإلكترونية.\n\n4. **التسوية والتحصيل الأولي (Upfront Payment & Validation):**\n   * يقوم العميل بسداد **50% كدفعة مقدمة / تأمين** (عبر السداد الإلكتروني أو تحويل بنكي مع رفع إيصال الدفع).\n   * يراجع محاسب المبيعات الدفعة، ويعتمدها بالنظام، وتتحول حالة المعاملة إلى **\"معاملة جاهزة\"**.\n\n5. **الجدولة والتنفيذ الميداني (Field Scheduling & Execution):**\n   * يحول النظام المعاملة لقسم التشغيل، ويصدر مدير التشغيل أمر الشغل (Work Order) وتعيين فريق الحفر والجيولوجي.\n   * يتم استلام صور الموقع الجغرافي، وتحديد جدول التنفيذ الزمني، وانتقال المركبات والمعدات.\n   * يقوم فني الحفر ميدانياً بحفر الجسة الفعلي وتوثيق أعماقها وأخذ العينات الممثلة.\n   * يقوم المهندس الجيولوجي بتوثيق إحداثيات الجسة الجغرافية بالـ GPS، ووقت أخذ العينة، وتصوير عينات التربة الميدانية.\n\n6. **الاختبارات المعملية والتقارير (Lab Testing & Review):**\n   * تُرسل عينات التربة إلى المعمل تحت إشراف المهندس المختص.\n   * يوزع مدير المختبر العينات على فنيي المعمل لإجراء فحوصات التصنيف والدمك وحدود اتربرج.\n   * يتم تسجيل الأوزان والنتائج في \"شيت الاختبارات\"، وتدقيقها من قبل المراجع الفني للتأكد من مطابقتها لكود التربة المعتمد.\n   * يُصدر الجيولوجي والمدير الفني التقرير النهائي (تقرير الجسات BH Report) المحتوي على التوصيات وقدرة التحمل.\n\n7. **الإنهاء المالي والتسليم (Financial Closure & Delivery):**\n   * يحال الملف للحسابات، ويتم مراجعة التكاليف الفعلية مقابل المقدرة، وإجراء التعديلات إن وجدت.\n   * يُطلب من العميل سداد الـ 50% المتبقية من قيمة المشروع.\n   * فور إتمام السداد، يتم إصدار الفاتورة الضريبية النهائية والربط مع ZATCA و Microtek.\n   * يُرسل التقرير المعتمد النهائي للعميل بالوسائل المتاحة، ويرفق تقييم الموقع عبر خرائط Google Maps في سجل المعاملة بالنظام.\n\n---\n\n### 2. دورة حياة اختبارات الخرسانة (Concrete Testing Lifecycle)\n\nتنظم هذه الدورة عمليات استلام وحفظ واختبار مكعبات الخرسانة الواردة من المواقع الإنشائية للتحقق من كفاءتها ومطابقتها للمواصفات:\n\n```mermaid\nflowchart TD\n    %% Define Styles\n    classDef stageStyle fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#60a5fa,font-weight:bold;\n    classDef stepStyle fill:#1e293b,stroke:#475569,stroke-width:1.5px,color:#cbd5e1;\n    classDef failStyle fill:#450a0a,stroke:#ef4444,stroke-width:1.5px,color:#fca5a5;\n\n    subgraph Prep [\"مرحلة التحضير الميداني والصب\"]\n        direction LR\n        A[\"أخذ عينات الخرسانة بالموقع\\n(6 لـ 100م³ أولى + 7 لكل 250م³ إضافي)\"]:::stepStyle --> B[\"إجراء اختبار الهبوط (Slump Test) ميدانياً\"]:::stepStyle\n        B --> C[\"تدوين القراءات في سجل ملاحظات صب الخرسانة\"]:::stepStyle\n    end\n\n    subgraph Curing [\"مرحلة الاستلام والمعالجة المعملية\"]\n        direction LR\n        D[\"استلام المكعبات بالمعمل وترميزها تسلسلياً\"]:::stepStyle --> E[\"غمر المكعبات في حوض المعالجة المائي المخصص\"]:::stepStyle\n    end\n\n    subgraph Testing [\"مرحلة اختبارات الكسر والتكسير\"]\n        direction TD\n        E --> F[\"كسر أول 6 عينات بعد 7 أيام من الصب\"]:::stepStyle\n        E --> G[\"كسر عينات المقاومة النهائية بعد 28 يوماً\"]:::stepStyle\n        F & G --> H[\"تسجيل قياسات الوزن والأبعاد ودخول شيت الاختبارات\"]:::stepStyle\n    end\n\n    subgraph Eval [\"مرحلة التقييم وإصدار التقرير\"]\n        direction TD\n        H --> I{\"تقييم نسبة النجاح\\n(المقاومة الفعالية >= 75%)\"}\n        \n        I -- نعم [مطابقة] --> J[\"اعتماد القراءات وإصدار التقرير النهائي المعتمد\"]:::stepStyle\n        I -- لا [غير مطابقة] --> K[\"إطلاق تنبيه جودة الجودة وإخطار المدير الفني\"]:::failStyle\n        \n        K --> L[\"التوجيه لإجراء اختبارات تكميلية غير متلفة\\n(Schmidt Hammer / Core Test)\"]:::stepStyle\n        L --> J\n    end\n\n    %% Flow connections between stages\n    C --> D\n    D --> E\n    \n    %% Style Subgraphs\n    style Prep fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;\n    style Curing fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;\n    style Testing fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;\n    style Eval fill:#0f172a,stroke:#1e3a8a,stroke-width:1.5px,color:#93c5fd;\n```\n\n1. **أخذ العينات الميدانية (Site Sampling):**\n   * يتم أخذ العينات بناءً على حجم صب الخرسانة في الموقع: **6 عينات لحجم 100م³ الأولى**، ويضاف **7 عينات إضافية لكل 250م³ إضافي**.\n   * يتم ترميز العينات وكتابة بياناتها: (الرقم التسلسلي، مكان الصب بالتحديد، وتاريخ الصب).\n\n2. **اختبار الهبوط (Slump Test):**\n   * يجرى اختبار الهبوط ميدانياً للخرسانة الرطبة قبل الصب، وتسجل الملاحظات والقيم فوراً في سجل \"ملاحظات صب الخرسانة\".\n\n3. **الاستلام والمعالجة (Receiving & Curing):**\n   * تُنقل المكعبات الخرسانية إلى المعمل، وتوضع في حوض المعالجة المائي المخصص للتحكم في رطوبتها وتصلدها الطبيعي.\n\n4. **اختبار التكسير (Crushing Tests):**\n   * **مرحلة الـ 7 أيام:** يتم سحب أول **6 عينات** من حوض المعالجة بعد مرور 7 أيام من تاريخ الصب، وقياس وزنها وأبعادها (الطول، العرض، الارتفاع) بدقة، ثم تكسيرها بمكبس هيدروليكي لتسجيل مقاومة الضغط الأولية في \"شيت الاختبارات\".\n   * **مرحلة الـ 28 يوماً:** يتم سحب واختبار العينات المتبقية بعد مرور 28 يوماً للحصول على القوة التصميمية النهائية للخرسانة.\n\n5. **تقييم ومطابقة النتائج (Evaluation & Compliance):**\n   * يحتسب النظام تلقائياً مقاومة التكسير، ويشترط لنجاح الاختبار ألا تقل النتيجة عن **75% كحد أدنى** من القوة التصميمية المطلوبة.\n   * **إجراءات النتائج غير المطابقة:** في حال فشل العينة (أقل من 75%)، يطلق النظام تنبيهاً بالجودة للجوانب الإدارية والفنية، ويوصي النظام بإجراء اختبارات غير متلفة إضافية مثل **مطرقة شميدت (Schmidt Hammer)** أو سحب عينة قلب خرساني **(Core Test)** للتحقق من صلب العنصر الإنشائي المشكوك فيه بالموقع.\n\n---\n\n### 3. مخطط التتابع التشغيلي للجسات (Borehole Sequence Diagram)\n\nيوضح المخطط التالي تتابع نداءات العمليات والبيانات بين جميع أطراف النظام والموديولات المنفصلة لتنفيذ معاملة الجسات من البداية وحتى الإغلاق:\n\n```mermaid\nsequenceDiagram\n    autonumber\n    actor Client as العميل (Client)\n    actor Sales as مهندس المبيعات\n    participant CRM as موديول علاقات العملاء (CRM)\n    participant Ticket as موديول التذاكر (Ticketing)\n    participant Finance as موديول المالية (Finance)\n    participant Ops as موديول التشغيل (Operations)\n    participant Field as المهندس الجيولوجي / الحفار\n    participant Lab as إدارة المختبر (Lab)\n\n    %% Step 1: Initial contact & quote\n    Client->>Sales: طلب خدمة فحص تربة (تحديد المساحة والأدوار والموقع)\n    Sales->>CRM: تسجيل الطلب وحساب عدد الجسات والعمق تلقائياً\n    CRM->>CRM: توليد عرض السعر بالمرجع (RAM-D-F-2606153)\n    CRM->>Client: إرسال عرض السعر للعميل (Email / WhatsApp)\n    \n    %% Step 2: Customer Approval\n    Client->>Sales: إرسال الموافقة ورفع التوقيع الإلكتروني الممسوح\n    Sales->>CRM: إرفاق التوقيع الإلكتروني وتغيير حالة العرض إلى \"مقبول\"\n    \n    %% Step 3: Finance Verification\n    CRM->>Ticket: إنشاء تذكرة معاملة بحالة \"معلقة (Pending)\" ملونة\n    CRM->>Finance: إرسال بيانات الفاتورة الأولية\n    Client->>Finance: سداد 50% دفعة مقدمة (بوابة الدفع أو تحويل بنكي)\n    Finance->>Finance: التحقق من الدفع وتطبيق التوجيه المحاسبي المالي\n    \n    %% Step 4: Operations & Field Work\n    Finance->>Ticket: تحديث حالة التذكرة إلى \"تحت التنفيذ\"\n    Finance->>Ops: إصدار أمر الشغل (Work Order)\n    Ops->>Field: تكليف طاقم الحفار والجيولوجي بالموقع والجدولة الزمنية\n    Field->>Field: فحص السيارة وتأكيد الاستلام عبر تطبيق الهاتف\n    Field->>Ops: رفع إحداثيات الجسات الميدانية (GPS) وصور العينات المستخرجة\n    Field->>Lab: شحن وتسليم العينات الميدانية رسمياً\n    \n    %% Step 5: Lab Work & Reporting\n    Lab->>Lab: استلام وتوزيع عينات الجسات وإجراء اختبارات التصنيف والدمك\n    Lab->>Ops: إدخال النتائج في شيت الاختبارات وتدقيقها وإصدار مسودة التقرير الجيوتقني\n    Ops->>Ops: مراجعة التقرير واعتماده فنياً من المدير الفني والجيوتقني\n    Ops->>Finance: تحويل الملف المكتمل لتسوية التكاليف\n    \n    %% Step 6: Final Payment and Delivery\n    Finance->>Finance: حساب الفروقات المالية وإصدار الفاتورة النهائية والربط مع ZATCA و Microtek\n    Finance->>Client: إشعار بطلب سداد الـ 50% المتبقية\n    Client->>Finance: سداد المبلغ المتبقي بالكامل\n    Finance->>Ticket: تحديث حالة التذكرة إلى \"معتمدة (Approved)\" وإغلاقها\n    Ops->>Client: تسليم التقرير الجيوتقني النهائي المعتمد + إرفاق تقييم Google Maps\n```\n\n---\n\n### 4. مخطط التتابع لاختبار الكثافة الحقلية (FDT Sequence Diagram)\n\nيوضح المخطط التالي دورة العمل الفنية الميدانية لاختبار الكثافة الحقلية للتربة (FDT) وآلية معالجة النتائج المطابقة وغير المطابقة لمعايير الجودة:\n\n```mermaid\nsequenceDiagram\n    autonumber\n    actor Consultant as المهندس الاستشاري بالموقع\n    participant LabTech as فني المختبر الميداني\n    participant Mobile as تطبيق الهاتف المحمول (Mobile App)\n    participant Ops as موديول التشغيل والمختبر\n    participant Reviewer as المهندس المراجع الفني\n\n    Ops->>LabTech: تكليف بمهمة إجراء اختبار الكثافة الحقلية FDT بالموقع\n    LabTech->>LabTech: تنفيذ الفحص بموقع العميل بطريقة مخروط الرمل (ASTM D1556)\n    LabTech->>Mobile: إدخال قراءات النقاط الميدانية والكثافة الحقلية الجافة\n    LabTech->>Consultant: أخذ توقيع الاستشاري والعميل الميداني على شيت القراءات\n    LabTech->>Mobile: تصوير شيت القراءات الموقع ميدانياً ورفع إحداثيات الموقع\n    Mobile->>Ops: مزامنة البيانات والصور مع خادم النظام الموحد\n    Ops->>Reviewer: تحويل الاختبار للمراجعة الفنية واعتماده كودياً\n    Reviewer->>Reviewer: مقارنة درجة دمك التربة المسجلة بالكثافة المعملية القصوى\n\n    alt درجة الدمك أكبر من 95% (> 95%) [مطابقة]\n        Reviewer->>Ops: اعتماد الاختبار وتوليد تقرير FDT النهائي بالترميز RAM-FDT-XXXX\n        Ops->>Consultant: تصدير وإرسال التقرير النهائي المعتمد للعميل والاستشاري\n    else درجة الدمك أقل من أو تساوي 95% [غير مطابقة]\n        Reviewer->>Ops: رفض اعتماد النتيجة وإطلاق تنبيه فشل الاختبار بالجودة\n        Ops->>LabTech: إرسال تكليف إعادة اختبار وإصدار تعليمات للموقع بإعادة الدمك\n        LabTech->>LabTech: إعادة زيارة الموقع بعد إعادة الدمك وإجراء الفحص مجدداً\n    end\n```\n\n---\n\n### 5. مخطط آلة الحالة للتذكرة والمعاملة (Ticket State Machine Diagram)\n\nيتحكم النظام بحالة المعاملة والتذكرة بنظام أوتوماتيكي دقيق يربط بين الموافقة المالية والعمليات التشغيلية، ويوضح مخطط آلة الحالة التالي الانتقالات بين الحالات التشغيلية الخمس المعتمدة بالنظام:\n\n```mermaid\nstateDiagram-v2\n    [*] --> معلقة : إعداد عرض السعر الأولي (رقم RAM-D-F-XXXX) تلقائياً\n    \n    state \"معلقة (Pending)\" as معلقة\n    state \"تحت التنفيذ (In Progress)\" as تحت_التنفيذ\n    state \"قيد الانتظار (On Hold)\" as قيد_الانتظار\n    state \"جاري العمل عليها (Working)\" as جاري_العمل\n    state \"معتمدة ومغلقة (Approved)\" as معتمدة\n\n    معلقة --> تحت_التنفيذ : سداد الدفعة المقدمة (50%) وإصدار أمر الشغل (Work Order)\n    معلقة --> [*] : إلغاء المعاملة أو عدم موافقة العميل على عرض السعر\n\n    تحت_التنفيذ --> قيد_الانتظار : توقف العمل الميداني (عدم جاهزية الموقع / عوامل مناخية / تعديل في نطاق العقد)\n    قيد_الانتظار --> تحت_التنفيذ : حل المعوقات الميدانية واستئناف أعمال الحفر\n\n    تحت_التنفيذ --> جاري_العمل : الانتهاء الميداني للجسات ونقل العينات للمختبر لبدء الفحص المعملي\n    جاري_العمل --> قيد_الانتظار : ظهور نتائج غير مطابقة (مثل فشل الدمك أو الخرسانة) تستدعي الفحص الاستثنائي\n    \n    جاري_العمل --> معتمدة : الانتهاء من إعداد ومراجعة التقرير الفني + سداد الـ 50% المتبقية مالياً\n    معتمدة --> [*] : تسليم التقارير المعتمدة للعميل وتوثيق Google Maps وإغلاق التذكرة نهائياً\n```\n"
+    },
+    {
+        "name": "03. تفاصيل مواصفات موديولات النظام",
+        "filename": "03_Module_Specifications_Deep_Dive.md",
+        "content": "# المخطط الفني والتجاري لنظام رامسسكو (Ramssko Lab ERP/LIMS)\n## الجزء الرابع: تفاصيل مواصفات موديولات النظام (10 الفرعية)\n**الملف:** `03_Module_Specifications_Deep_Dive.md`\n\n---\n\n### موديول Sub 1: إدارة أعمال التربة والمختبر (Manage Lobe)\n\n#### 1. الغرض والمسؤوليات (Purpose & Responsibilities):\n* هذا الموديول هو جوهر النظام التشغيلي ومسؤول عن تخطيط ومراقبة عمليات حفر الجسات الاستكشافية، وتوثيق استلام عينات التربة والخرسانة، وإدارة شيتات إدخال نتائج الفحوصات المعملية، وإعداد وتدقيق تقارير الفحص والتقارير الجيوتقنية النهائية وتطبيق أكواد الجودة الوطنية والدولية (ISO 17025).\n\n#### 2. الكيانات والخصائص الأساسية (Core Entities & Attributes):\n* **المشروع (SoilProject):** اسم المشروع، العميل، رقم المشروع، البلدية/المدينة (الرياض، الدمام)، مساحة البناء الكلية (بالمتر المربع)، نوع المشروع (سكني، تجاري)، عدد الأدوار (الطوابق).\n* **الجسّة (Borehole):** المعرف الفريد (رمز BH والترقيم التلقائي)، العمق المستهدف (بالأمتار)، العمق الفعلي، إحداثيات الموقع (خط الطول ودائرة العرض)، التاريخ والوقت، المهندس الجيولوجي المسؤول، فني الحفر.\n* **عينة التربة (SoilSample):** المعرف الفريد، معرف الجسّة، عمق استخراج العينة (من سطح الأرض)، نوع العينة (مقلقلة، غير مقلقلة)، التوصيف البصري للتربة، التوقيت، الإحداثيات، وصور العينة الميدانية.\n* **عينة الخرسانة (ConcreteSample):** الرقم التسلسلي الفريد، موقع الصب بالتحديد بالمشروع، تاريخ صب الخرسانة، تاريخ الاختبار المستهدف (7 أيام، 28 يوماً)، الأبعاد المقاسة (الطول، العرض، الارتفاع بالمليمتر)، الوزن الفعلي قبل الكسر (بالجرام)، مقاومة الضغط التصميمية المستهدفة (MPa).\n* **تقرير الدمك (CompactionReport - FDT):** رقم التقرير (مثال: `RAM-FDT-2512078-Z1-58`)، تاريخ الفحص، طريقة الفحص (ASTM D 1556)، موقع الاختبار (رقم الطبقة Z1)، نقاط القياس الثلاث، قيمة كثافة الحقل الجافة المقاسة، نسبة الدمك المحققة (Compaction Degree)، النتيجة (ناجح/راسب)، وتوقيع الاستشاري والعميل الميداني.\n\n#### 3. قواعد العمل والصيغ الرياضية (Business Rules & Formulas):\n* **قاعدة تحديد عدد الجسات التلقائي:** يتم حساب عدد الجسات بناءً على مساحة البناء الإجمالية ونوع المبنى مقرباً لأقرب 100 متر مربع وفقاً للمصفوفة المعتمدة في النظام:\n  - المساحة من **0 إلى 800 م²:** عدد الجسات المطلوبة = **3 جسات كحد أدنى** (توزع لتمثيل الموقع).\n  - المساحة من **900 إلى 1500 م²:** عدد الجسات المطلوبة = **4 جسات**.\n  - المساحة من **1600 إلى 2000 م²:** عدد الجسات المطلوبة = **5 جسات**.\n  - المساحة من **2100 إلى 3000 م²:** عدد الجسات المطلوبة = **6 جسات**.\n  - المساحة من **3100 إلى 3500 م²:** عدد الجسات المطلوبة = **7 جسات**.\n  - المساحة من **3600 إلى 4100 م²:** عدد الجسات المطلوبة = **8 جسات**.\n  - المساحة من **4200 إلى 4600 م²:** عدد الجسات المطلوبة = **9 جسات**.\n  - المساحة من **4700 إلى 5100 م²:** عدد الجسات المطلوبة = **10 جسات**.\n  - المساحة من **5200 إلى 6100 م²:** عدد الجسات المطلوبة = **11 جسات**.\n  - المساحة من **6200 إلى 7100 م²:** عدد الجسات المطلوبة = **12 جسات**.\n  - المساحة **أكبر من 7200 م²:** عدد الجسات المطلوبة = **13 جسة كحد أدنى**.\n* **محددات أعماق الجسات القياسية:**\n  - لتسعير الجسات القياسي لثلاث جسات: يتم تنفيذ **جستين بعمق 7 أمتار وجسة واحدة بعمق 10 أمتار** (مجموع الأمتار الكلي = 24 متراً).\n* **صيغة حساب واحتساب أسعار الجسات (Riyadh vs Dammam):**\n  - **الرياض (Riyadh):** سعر الجسة القياسية الواحدة = **500 ريال** (للعمق القياسي 24 متراً إجمالاً، المجموع = 1500 ريال). سعر المتر الإضافي يحتسب بحسب عمق الجسة الفردية:\n    * عمق 7 أمتار: **70 ريال/متر** (الإجمالي 490 ريال).\n    * عمق 10 أمتار: **70 ريال/متر** (الإجمالي 700 ريال).\n    * عمق 12 متراً: **110 ريال/متر** (الإجمالي 1320 ريال).\n    * عمق 15 متراً: **120 ريال/متر** (الإجمالي 1800 ريال).\n    * عمق 18 متراً: **140 ريال/متر** (الإجمالي 2520 ريال).\n    * عمق 20 متراً: **170 ريال/متر** (الإجمالي 3400 ريال).\n    * عمق 25 متراً: **200 ريال/متر** (الإجمالي 5000 ريال).\n    * عمق 30 متراً: **220 ريال/متر** (الإجمالي 6600 ريال).\n  - **الدمام (Dammam):** سعر الجسة القياسية الواحدة = **800 ريال** (للعمق القياسي 24 متراً إجمالاً، المجموع = 2400 ريال). سعر المتر الإضافي يحتسب بحسب عمق الجسة الفردية:\n    * عمق 7 أمتار: **90 ريال/متر** (الإجمالي 630 ريال).\n    * عمق 10 أمتار: **120 ريال/متر** (الإجمالي 1200 ريال).\n    * عمق 12 متراً: **120 ريال/متر** (الإجمالي 1440 ريال).\n    * عمق 15 متراً: **130 ريال/متر** (الإجمالي 1950 ريال).\n    * عمق 18 متراً: **130 ريال/متر** (الإجمالي 2340 ريال).\n    * عمق 20 متراً: **140 ريال/متر** (الإجمالي 2800 ريال).\n    * عمق 25 متراً: **160 ريال/متر** (الإجمالي 4000 ريال).\n    * عمق 30 متراً: **160 ريال/متر** (الإجمالي 4800 ريال).\n* **معادلة تحديد عدد عينات الخرسانة المطلوبة:**\n  - لحجم صب خرساني يبلغ **100 متر مكعب أولى:** يؤخذ **6 عينات خرسانية**.\n  - لكل **250 متر مكعب إضافي** صب بالموقع: يتم أخذ **7 عينات إضافية**.\n* **معايير ونسب النجاح للاختبارات الفنية:**\n  - **نجاح اختبار الدمك (Compaction):** يجب أن تكون درجة الدمك الحقلية المقاسة طبقاً لـ ASTM D1556 **أكبر من 95% (> 95%)** من الكثافة الجافة القصوى المحددة بالمعمل عبر اختبار بروكتور ASTM D1557.\n  - **نجاح اختبار تكسير الخرسانة (CST):** يجب ألا تقل مقاومة الكسر المقاسة عن **75% كحد أدنى** من القوة التصميمية المطلوبة للمكعب الخرساني.\n\n#### 4. نقاط التكامل البيني (Integration Points):\n* يستقبل طلبات البدء من موديول التذاكر (Sub 4) عند تحويل المعاملة إلى \"تحت التنفيذ\" وموافقة المالية.\n* يرسل قراءات الجسات والتكاليف الميدانية الفعلية لموديول الحسابات (Sub 10) لتسوية الأسعار.\n* يتحقق من تفعيل حالة معايرة أجهزة المختبر الفنية عبر موديول المعايرة (Sub 7) كشرط لإصدار وحفظ التقارير.\n\n---\n\n### موديول Sub 2: إدارة الموارد البشرية (HR)\n\n#### 1. الغرض والمسؤوليات:\n* إدارة بيانات وملفات الموظفين الإداريين، والمهندسين، وفنيي الحفر والمختبر، ومتابعة الحضور والانصراف، وإدارة الأجندة الزمنية للوظائف (Calendar & Emp Action)، ومعالجة الإجازات والتقييمات، وضبط ورديات الدوام.\n\n#### 2. الكيانات والخصائص الأساسية:\n* **الموظف (Employee):** المعرف الرقمي، الاسم الكامل، المسمى الوظيفي (مديرين، فنيين، مهندسين)، نوع نظام العمل (Remotely: عن بعد، Onsite: في الموقع)، القسم الإداري، الراتب الأساسي، وتاريخ التعيين.\n* **الأجندة الإدارية (CalendarAction):** معرف الموظف، تاريخ الإجراء، نوع الإجراء الإداري (تكليف، ترقية، جزاء، عهدة)، الملاحظات الفنية.\n* **الحضور والانصراف (AttendanceLog):** المعرف، معرف الموظف، التاريخ، وقت الحضور، وقت الانصراف، الموقع الجغرافي للتبصيم (GPS)، والتأخير بالدقائق.\n* **طلب الإجازة (LeaveRequest):** معرف الموظف، نوع الإجازة (سنوية، مرضية، طارئة)، تاريخ البدء، تاريخ الانتهاء، وحالة الطلب (مقبول، مرفوض، قيد المراجعة).\n* **تقييم الأداء (EmployeeEvaluation):** معرف الموظف، معرف المهمة الموكلة، تاريخ التكليف، تاريخ الإنجاز، معايير التقييم، ونقاط التقييم المحققة.\n\n#### 3. قواعد العمل والصيغ الرياضية:\n* **حصر نظام العمل:** يجب تصنيف نظام العمل لكل موظف بشكل صارم إما كعمل عن بعد **(Remotely)** أو في الموقع ميدانياً **(Onsite)**.\n* **تفعيل الدوام:** تحديد نوع جدول الدوام إما **نظام ورديات (Shifts)** للفنيين والحفارين أو **دوام كامل (Full-time)** للإدارة والمبيعات.\n* **تقييم الموظف:** يحتسب النظام التقييم تلقائياً بناءً على مهام محددة يتم تكليفه بها وإنجازها في التوقيت والوقت المحدد مسبقاً للتقرير.\n\n#### 4. نقاط التكامل البيني:\n* يزود موديول التشغيل (Sub 1) بقائمة الفنيين والمهندسين المتاحين للجدولة اليومية.\n* يرسل بيانات الغياب والتأخيرات والجزاءات لموديول المالية (Sub 10) لاحتساب الرواتب والمستحقات الشهرية.\n\n---\n\n### موديول Sub 3: التسويق (Marketing)\n\n#### 1. الغرض والمسؤوليات:\n* إدارة الحملات التسويقية، وتوثيق استفسارات وطلبات العملاء الجدد الواردة للمختبر، ومتابعة أداء قنوات التسويق وتحديد العائد على الاستثمار منها.\n\n#### 2. الكيانات والخصائص الأساسية:\n* **الحملة التسويقية (MarketingCampaign):** معرف الحملة، اسم الحملة، قنوات النشر (وسائل التواصل الاجتماعي، زيارات ميدانية)، التكلفة المرصودة، تاريخ البدء، وتاريخ الانتهاء.\n* **الاستفسار (Inquiry):** معرف الاستفسار، اسم العميل المهتم، رقم التواصل، البريد الإلكتروني، نوع الخدمة المطلوبة، ومصدر الاستفسار.\n\n#### 3. قواعد العمل والصيغ الرياضية:\n* **صيغة العائد على الاستثمار التسويقي (ROI):** يحتسب النظام كفاءة الحملة عبر المعادلة: `(إجمالي قيمة العقود المحققة من الحملة - تكلفة الحملة) / تكلفة الحملة * 100`.\n* **تنبيهات الاستجابة:** يجب تصنيف الاستفسارات وتحويلها لفرص بيعية في موديول CRM خلال فترة لا تتجاوز 24 ساعة من تاريخ إنشائها بالنظام.\n\n#### 4. نقاط التكامل البيني:\n* يغذي موديول علاقات العملاء CRM (Sub 6) بالبيانات الأساسية للفرص البيعية والعملاء المحتملين تلقائياً.\n\n---\n\n### موديول Sub 4: بوابة الويب وإدارة التذاكر (Web/Ticket)\n\n#### 1. الغرض والمسؤوليات:\n* إدارة واجهة العميل للويب وبوابة تقديم الطلبات والتذاكر الفنية والإدارية، ومتابعة إرفاق المستندات الممسوحة ضوئياً وصور التواقيع الإلكترونية والتحويلات البنكية.\n\n#### 2. الكيانات والخصائص الأساسية:\n* **التذكرة (Ticket):** معرف التذكرة، معرف العميل، عنوان الطلب، نوع الطلب (فحص تربة، اختبار خرسانة، استفسار)، حالة التذكرة التشغيلية، ومستوى الأولوية.\n* **المستند المرفوع (FileScan):** المعرف، معرف التذكرة، نوع المستند (توقيع إلكتروني ممسوح ضوئياً، إيصال تحويل بنكي، صور الموقع الجغرافي)، مسار الملف بالنظام، وتاريخ ووقت الرفع.\n\n#### 3. قواعد العمل والصيغ الرياضية:\n* **إنشاء التذكرة التلقائي:** يتم إنشاء تذكرة (Ticket) تلقائياً في النظام وتكون في حالة **(معلقة - Pending)** مباشرة فور قيام المبيعات بإصدار عرض السعر للعميل.\n* **شاشة العرض الملونة:** يعرض النظام شاشة مخصصة لكافة المعاملات والتذاكر المعلقة، ويتم تلوين التذاكر بالألوان (الأحمر للمعاملات المعلقة بانتظار المالية، الأصفر للمعاملات تحت التنفيذ، الأخضر للتقارير المعتمدة الجاهزة للتسليم).\n* **إثبات موافقة العميل:** لا يسمح النظام بتحويل حالة التذكرة المعلقة للتشغيل إلا بعد مطابقة النظام لوجود التوقيع الإلكتروني الممسوح للعميل (Scanned Electronic Signature) على عرض السعر.\n\n#### 4. نقاط التكامل البيني:\n* يرسل مستندات التحويلات البنكية المرفوعة من العميل لموديول المالية (Sub 10) للتحقق منها واعتماد السداد.\n* يعرض للعميل الحالات اللحظية وتحديثات سير العمل من موديول التشغيل (Sub 1).\n\n---\n\n### موديول Sub 5: تطبيقات الهاتف المحمول (Mobile Module)\n\n#### 1. الغرض والمسؤوليات:\n* واجهة الموظفين الحقلية وفنيي الحفر (Drillers Mobile Interface) لتسجيل الحضور، واستلام المركبات وتأكيد الفحوصات والرفع اللحق لبيانات الجسات، وواجهة العملاء لاستعراض حالة طلباتهم.\n\n#### 2. الكيانات والخصائص الأساسية:\n* **جلسة تطبيق الهاتف (MobileSession):** معرف الجلسة، معرف المستخدم، الرقم التعريفي للجهاز، التوقيت، ونوع المستخدم (موظف/عميل).\n* **بيانات الفحص اليومي للمركبة (VehicleChecklist):** معرف المركبة، معرف السائق، تاريخ ووقت الفحص، حالة السائق والسيارة الفنية، والتوقيع الرقمي للسائق.\n\n#### 3. قواعد العمل والصيغ الرياضية:\n* **قاعدة استلام المركبة:** يلزم النظام السائق الميداني بتوقيع تقرير استلام المركبة رسمياً في شاشة التطبيق وإتمام الفحص الفني قبل السماح بتحرك الحفار لموقع العمل.\n* **التحقق من الإحداثيات (GPS Validation):** يطابق التطبيق إحداثيات فني الحفر الجغرافية مع الموقع المحدد في أمر الشغل لضمان عدم إدخال عينات التربة من خارج حدود الموقع الفعلي للعميل.\n\n#### 4. نقاط التكامل البيني:\n* يرسل إحداثيات الحفر الميدانية وصور العينات لحظياً لموديول إدارة الجسات (Sub 1).\n* يرسل حركات الحضور والانصراف الجغرافية لموديول الموارد البشرية HR (Sub 2).\n\n---\n\n### موديول Sub 6: إدارة علاقات العملاء (CRM)\n\n#### 1. الغرض والمسؤوليات:\n* إدارة وتوثيق جهات اتصال العملاء والشركات والمكاتب الاستشارية، وإصدار عروض الأسعار وتحديد الخصومات، والاتصال والتنسيق ومتابعة موافقة العملاء وتوقيعاتهم.\n\n#### 2. الكيانات والخصائص الأساسية:\n* **جهة اتصال العميل (CustomerContact):** معرف العميل، اسم الشركة/المكتب، اسم الشخص المسؤول، رقم الهاتف، البريد الإلكتروني، العنوان.\n* **عرض السعر (Quotation):** رقم مرجع عرض السعر (بالتنسيق `RAM-D-F-YYMMDD[Number]`)، تاريخ الإصدار، معرف العميل، مساحة البناء الكلية، عدد الجسات المحتسب، عمق الجسات المستهدف، القيمة الإجمالية قبل الضريبة، الخصم الممنوح، وحالة العرض (مسودة، مرسل، مقبول، مرفوض).\n\n#### 3. قواعد العمل والصيغ الرياضية:\n* **تنسيق المرجع لعرض السعر:** يجب على النظام فرض التنسيق الفريد تلقائياً عند الإنشاء (مثال: **RAM-D-F-2606153**).\n* **قواعد سريان العرض:** تسقط صلاحية عرض السعر المرسل بالنظام تلقائياً بعد مرور 30 يوماً من تاريخ إصداره ما لم يعتمده العميل.\n\n#### 4. نقاط التكامل البيني:\n* يرسل عروض السعر المقبولة من العميل مع التوقيع الإلكتروني الممسوح لموديول التذاكر (Sub 4) لتوليد التذكرة المعلقة.\n* يرسل القيم المالية المعتمدة للفوترة لموديول المالية (Sub 10).\n\n---\n\n### موديول Sub 7: الصيانة والمعايرة (Calibration)\n\n#### 1. الغرض والمسؤوليات:\n* جدولة وتوثيق الصيانة الوقائية والطارئة لأسطول الحفارات والمركبات، وجدولة وضبط معايرة أجهزة ومعدات مختبر الفحص والكسر للامتثال لمتطلبات الجودة ISO 17025.\n\n#### 2. الكيانات والخصائص الأساسية:\n* **سجل المعايرة (CalibrationRecord):** معرف الجهاز، اسم جهاز المختبر، تاريخ المعايرة الأخير، الجهة المعايرة، تاريخ انتهاء المعايرة المستهدف، وحالة الجهاز الفنية (معاير، غير معاير).\n* **سجل صيانة المعدات (MaintenanceLog):** معرف المعدة/السيارة، نوع الصيانة (دورية وقائية، طارئة)، القطع المستبدلة، التكلفة المالية، تاريخ الصيانة، والمهندس القائم بالصيانة.\n\n#### 3. قواعد العمل والصيغ الرياضية:\n* **تنبيهات انتهاء المعايرة:** يرسل النظام إخطارات دورية وتلقائية قبل **15 يوماً** من تاريخ انتهاء معايرة أي جهاز فحص بالمعمل.\n* **إغلاق الجهاز التلقائي:** يتم قفل واجهة إدخال نتائج شيت الاختبارات لجهاز معملي معين بالنظام فور انتهاء فترة صلاحية معايرته ويمنع الفني من تسجيل قراءات كسر عينات باستخدامه حتى توثيق معايرة جديدة.\n\n#### 4. نقاط التكامل البيني:\n* يتكامل مع موديول الأصول الثابتة (Sub 8) للحصول على سجل السيارات والحفارات المستهدفة بالصيانة.\n* يتكامل مع موديول المشتريات والمخزن (Sub 9) لطلب قطع الغيار اللازمة للصيانة.\n\n---\n\n### موديول Sub 8: إدارة الأصول الثابتة (Fixed Asset)\n\n#### 1. الغرض والمسؤوليات:\n* حصر وجدولة الأصول المملوكة للمختبر (الحفارات الميدانية، الأجهزة المعملية، المركبات والسيارات الإدارية)، ومتابعة تراخيصها وفحوصاتها الدورية.\n\n#### 2. الكيانات والخصائص الأساسية:\n* **الأصل الثابت (FixedAsset):** معرف الأصل، اسم الأصل، الرقم التسلسلي، تاريخ الشراء، قيمة الشراء، نسبة الإهلاك السنوية، وقيمته الدفترية الحالية.\n* **ملف المركبة الشامل (VehicleRecord):** معرف المركبة (رقم اللوحة)، نوع السيارة، سنة الصنع، تاريخ انتهاء استمارة الترخيص، تاريخ انتهاء الفحص الدوري الفني للسيارة.\n* **سجل استلام المركبة (VehicleHandover):** معرف الاستلام، معرف المركبة، اسم المستلم (السائق/الحفار)، تاريخ الاستلام، تاريخ التسليم الفعلي، حالة المركبة عند الاستلام، وتوقيع المستلم بالاستلام.\n\n#### 3. قواعد العمل والصيغ الرياضية:\n* **تنبيهات انتهاء التراخيص:** يرسل النظام تنبيهات دورية تلقائية تشمل:\n  - مواعيد الفحص الدوري للمركبات والآلات قبل **30 يوماً** من انتهائه.\n  - تاريخ انتهاء التراخيص الرسمية للمركبات (استمارة الترخيص) قبل **30 يوماً**.\n* **صيغة إهلاك القسط الثابت للأصول:** يحتسب النظام القيمة الدفترية للأصل بنهاية كل فترة مالية عبر المعادلة: `القيمة الدفترية = قيمة الشراء - (قيمة الشراء * نسبة الإهلاك السنوية * (عدد أشهر الخدمة / 12))`.\n\n#### 4. نقاط التكامل البيني:\n* يرسل تنبيهات الأصول والمركبات لموديول الصيانة والمعايرة (Sub 7) لجدولة زيارات الفحص والصيانة الميكانيكية.\n* يشارك بيانات المركبات المتاحة مع موديول الموبايل (Sub 5) لتمكين السائقين من تأكيد الاستلام الميداني.\n\n---\n\n### موديول Sub 9: إدارة المخزون (Stock Management)\n\n#### 1. الغرض والمسؤوليات:\n* إدارة مستلزمات الحفر وقطع غيار الحفارات، وأدوات ومستهلكات مختبر الفحص والكسر (المواد الكيميائية والأحواض الرملية)، وتوثيق حركات الصرف والتوريد وتنبيهات مستويات المخزون الحرجة.\n\n#### 2. الكيانات والخصائص الأساسية:\n* **مادة مخزنية (StockItem):** معرف المادة، اسم المادة، وحدة القياس، الكمية المتاحة بالرصيد، حد الطلب الأدنى (Safety Stock)، والموقع بالمستودع.\n* **حركة مخزنية (StockTransaction):** معرف الحركة، معرف المادة، نوع الحركة (صرف، توريد، إتلاف)، الكمية، التاريخ والوقت، اسم الموظف المسؤول، ورقم المرجع (أمر الشغل WO أو الفاتورة).\n\n#### 3. قواعد العمل والصيغ الرياضية:\n* **إطلاق حد إعادة الطلب:** يُرسل النظام إشعار شراء تلقائي لقسم التوريد فورا انخفاض الرصيد الفعلي للمادة عن حد الطلب الأدنى المحدد بالمعادلة: `حد الطلب الأدنى = (معدل الاستهلاك اليومي الأقصى * فترة التوريد بالأيام)`.\n\n#### 4. نقاط التكامل البيني:\n* يزود موديول الصيانة (Sub 7) بقطع الغيار اللازمة لإصلاحات الحفارات والسيارات.\n* يتكامل مع موديول المالية (Sub 10) لمطابقة فواتير المشتريات المخزنية وإدراج قيم الأصول المتداولة.\n\n---\n\n### موديول Sub 10: الإدارة المالية ودفتر الأستاذ العام (GL)\n\n#### 1. الغرض والمسؤوليات:\n* إعداد شجرة الحسابات (دليل الحسابات COA)، وتوليد القيود المحاسبية الآلية واليدوية، والتحقق المالي من التحصيلات وعروض الأسعار والضرائب، وتطبيق متطلبات الربط الضريبي وهيئة ZATCA، وتصدير ومزامنة القيود مع نظام Microtek المالي.\n\n#### 2. الكيانات والخصائص الأساسية:\n* **قيد اليومية العامة (JournalEntry):** معرف القيد، تاريخ القيد، البيان/شرح الحركة، معرف الحساب، مدين (Debit)، دائن (Credit)، والرمز التعريفي للمشروع.\n* **الفاتورة الضريبية (Invoice):** رقم الفاتورة التسلسلي، تاريخ الفاتورة، معرف العميل، القيمة الصافية، نسبة ضريبة القيمة المضافة (15%)، قيمة الضريبة، المبلغ الإجمالي شامل الضريبة، رمز الـ QR المعتمد من هيئة الزكاة والضريبة، ملف الـ XML المرتبط، وحالة الفاتورة (فاتورة أولية، فاتورة معتمدة نهائية).\n* **سند القبض (PaymentReceipt):** معرف السند، رقم الفاتورة، المبلغ المقبوض، طريقة الدفع (إلكتروني، تحويل بنكي)، صورة مستند التحويل البنكي للمطابقة، وتوقيع محاسب المبيعات بالمصادقة.\n\n#### 3. قواعد العمل والصيغ الرياضية:\n* **قاعدة دفع التأمين لبدء التنفيذ:** يُقيد النظام بدء أمر الشغل للمشاريع بضرورة مطابقة التحصيل المالي الفعلي والتأكد من تحصيل نسبة **50% كدفعة مقدمة / تأمين** على الحساب قبل البدء في أي عمل تشغيلي.\n* **صيغة احتساب ضريبة القيمة المضافة:**\n  - `قيمة الضريبة = القيمة الصافية للفاتورة * 0.15`\n  - `المبلغ الإجمالي شامل الضريبة = القيمة الصافية للفاتورة * 1.15`\n* **معايير هيئة ZATCA:** توليد ملف الـ XML للفاتورة وحساب التوقيع الرقمي (Cryptographic Stamp) للربط المباشر مع بوابة الهيئة الإلكترونية للمرحلة الثانية.\n\n#### 4. نقاط التكامل البيني:\n* يتلقى إشعارات قبول عروض الأسعار من موديول علاقات العملاء CRM (Sub 6) لتوليد التذاكر المالية المعلقة.\n* يرسل حالة السداد (تحصيل 50% تأمين) لموديول التشغيل (Sub 1) للسماح بإصدار أمر الشغل.\n* يقوم بعمل تكامل تام ومزامنة آلية لكافة القيود وسندات القبض والفواتير مع برنامج **Microtek** المالي الخارجي.\n"
+    },
+    {
+        "name": "04. العمليات الميدانية وإدارة المختبرات",
+        "filename": "04_Field_Operations_and_Lab_Management.md",
+        "content": "# المخطط الفني والتجاري لنظام رامسسكو (Ramssko Lab ERP/LIMS)\n## الجزء الخامس: العمليات الميدانية وإدارة المختبرات\n**الملف:** `04_Field_Operations_and_Lab_Management.md`\n\n---\n\n### 1. الخطوات التنفيذية والميدانية للحفر والجس (Field Execution Steps)\n\nتسير العمليات الميدانية لحفر الجسات واستخراج العينات وفق بروتوكول صارم يضمن جودة العينات ودقة تحديد المواقع الجغرافية للتأسيس:\n\n1. **تجهيز الموقع والتحقق الجغرافي (Site Preparation & Survey):**\n   * فور صدور أمر الشغل (Work Order)، يراجع مهندس التشغيل صور الموقع المرفوعة.\n   * يتم تحديد مخطط الحفر الجغرافي وجدول التنفيذ الزمني بدقة وتثبيت الموقع عبر خرائط Google Maps.\n   * يقوم فني الحفر بإجراء الفحص اليومي للمركبة والحفار عبر تطبيق الهاتف لتأكيد الجاهزية الميكانيكية.\n\n2. **تحرك الفريق وتحديد نقاط الجس (Mobilization & Point Staking):**\n   * ينتقل طاقم الحفر (فني الحفار ومساعده) برفقة المهندس الجيولوجي للموقع.\n   * يتم توثيق الإحداثيات الجغرافية لبدء العمل الفعلي باستخدام الـ GPS المدمج بالهاتف لتأكيد التواجد داخل حدود أرض العميل.\n\n3. **عمليات الحفر الميكانيكي (Drilling Operations):**\n   * يتم تنفيذ الحفر الرأسي باستخدام آلة الحفر (Drilling Rig) للوصول للأعماق المطلوبة.\n   * في حال وجود طبقات خرسانية أو أسفلتية سطحية، يتم استخدام منشار الكور لعمل فتحة بالكور للجسات (Hole Core - HOL) لتمكين آلة الحفر من النفاذ.\n   * يتم الحفر القياسي للجسات الاستكشافية بالأعماق المحددة (مثال: جستين بعمق 7 أمتار وجسة بعمق 10 أمتار).\n\n4. **أخذ وتوثيق عينات التربة (Soil Sampling & Visual Logging):**\n   * يتم استخراج عينات التربة من الجسة من أعماق مختلفة ومتنوعة من سطح الأرض.\n   * يقوم المهندس الجيولوجي المختص باستلام عينات التربة وتصنيفها بصرياً وتصويرها.\n   * يُلزم النظام الجيولوجي بتدوين كافة التفاصيل الميدانية لكل عينة: (وقت الاستخراج، الإحداثيات الجغرافية الدقيقة للجسّة، وعمق استخراج العينة).\n\n5. **شحن وتسليم العينات للمعمل (Sample Dispatch):**\n   * يتم حفظ عينات التربة في أوعية محكمة الإغلاق ومصنفة ببطاقات تعريفية رقمية لضمان عدم اختلاطها.\n   * تُشحن العينات إلى مقر مختبر رامسسكو وتسلم رسمياً تحت إشراف وتوجيه المهندس المختص لبدء دورة الاختبارات.\n\n---\n\n### 2. معايير وأكواد الاختبارات المعملية والميدانية (Lab Testing Standards)\n\nتُدار وتُنفذ كافة الفحوصات المعملية والميدانية للتربة والمواد الإنشائية بموجب الأكواد والمعايير الدولية لضمان موثوقية الاعتماد:\n\n#### أ. اختبار الدمك معملياً (Compaction Test - ASTM D1557):\n* **الغرض:** تحديد العلاقة بين محتوى الرطوبة والكثافة الجافة للتربة للوصول لأقصى كثافة جافة (Modified Proctor).\n* **الإجراء:** يتم دمك عينة التربة في قالب قياسي على خمس طبقات باستخدام مطرقة ميكانيكية بوزن وأبعاد محددة.\n* **النتائج:** يتم رسم منحنى الدمك وتحديد \"الرطوبة المثلى\" و\"الكثافة الجافة القصوى\" لإرسالها لمجموعة اختبارات التربة كمرجع لاختبارات الموقع.\n\n#### ب. اختبار الكثافة الحقلية ميدانياً (Field Density Test - ASTM D1556):\n* **الغرض:** قياس كثافة التربة الجافة الفعلية المدموكة في الموقع للتأكد من جودة الأعمال الترابية للمقاول.\n* **طريقة مخروط الرمل (Sand Cone Method):**\n  - يتم حفر حفرة صغيرة في الطبقة المدموكة (الطبقة Z1) وجمع التربة المستخرجة ووزنها وتجفيفها لحساب رطوبتها.\n  - تُملأ الحفرة برمل فحص قياسي معير الكثافة من خلال مخروط الرمل لحساب حجم الحفرة بدقة.\n  - يحتسب النظام الكثافة الجافة الحقلية ويقارنها بالكثافة القصوى للمعمل.\n* **شرط النجاح:** يجب أن تكون درجة الدمك **أكبر من 95% (> 95%)**.\n\n#### ج. اختبار القلب الخرساني (Core Test):\n* **الغرض:** اختبار شبه متلف لقطع عينات أسطوانية خرسانية من المنشأ المتصلد لتقدير مقاومتها الفعلية للضغط.\n* **الإجراء:** يتم أخذ العينات بعد أيام محددة من الصب وفقاً للمواصفة المعتمدة باستخدام ماكينة ثقب الخرسانة، وتجهيز سطح العينة وفحصها بالمعمل تحت المكبس الهيدروليكي.\n\n#### د. اختبار مطرقة شميدت الميداني (Schmidt Hammer):\n* **الغرض:** اختبار غير متلف لتقدير المقاومة التقريبية السطحية للخرسانة المتصلدة ميدانياً دون إتلاف العناصر الإنشائية.\n* **الإجراء:** تسليط صدمات ارتدادية ميكانيكية على سطح الخرسانة النظيف وحساب رقم الارتداد (Rebound Number) ومطابقته بجداول المقاومة بالنظام.\n\n#### هـ. اختبار لوح التحميل الميداني (Plate Load Test - PLT):\n* **الغرض:** اختبار ميداني مستقل ومباشر لتقدير قدرة تحمل التربة التصميمية ومقدار الهبوط المتوقع تحت الأساسات.\n* **الإجراء:** وضع لوح فولاذي قياسي على سطح التربة وتسليط أحمال هيدروليكية متزايدة ومراقبة الهبوط المقاس بساعات القياس (Dial Gauges)، ويتم إعداد تقرير فني خاص ومنفصل له بالنظام.\n\n---\n\n### 3. تكامل موديول المعايرة مع أجهزة المختبر (Equipment & Calibration Sync)\n\nللامتثال لمعيار **ISO 17025**، يعمل موديول الصيانة والمعايرة (Sub 7) كمراقب برمي ذكي لأصول وأجهزة المختبر:\n\n```mermaid\nflowchart TD\n    %% Define Styles\n    classDef successStyle fill:#0f172a,stroke:#10b981,stroke-width:2px,color:#34d399,font-weight:bold;\n    classDef failStyle fill:#450a0a,stroke:#ef4444,stroke-width:2px,color:#fca5a5,font-weight:bold;\n    classDef stepStyle fill:#1e293b,stroke:#475569,stroke-width:1.5px,color:#cbd5e1;\n    classDef alertStyle fill:#78350f,stroke:#d97706,stroke-width:1.5px,color:#fef3c7;\n\n    A[\"اختيار جهاز الفحص المعملي\\n(مكبس الكسر / مخروط الرمل)\"]:::stepStyle --> B{\"التحقق من حالة وتاريخ صلاحية المعايرة\"}\n    \n    B -- \"المعايرة سارية (Active)\" --> C[\"جهاز فحص معتمد وحالته: معاير\"]:::successStyle\n    C --> D[\"السماح بحفظ شيت القراءات وتوليد التقرير\"]:::stepStyle\n    \n    B -- \"المعايرة منتهية (Expired)\" --> E[\"جهاز فحص غير معتمد وحالته: منتهي\"]:::failStyle\n    E --> F[\"قفل واجهة تسجيل وإدخال البيانات برمجياً\"]:::failStyle\n    F --> G[\"إصدار أمر عمل معايرة وصيانة دورية\"]:::stepStyle\n    G --> H[\"معايرة الجهاز وإصدار شهادة المعايرة الجديدة\"]:::stepStyle\n    H --> I[\"تحديث تاريخ انتهاء المعايرة بالنظام\"]:::stepStyle\n    I --> B\n    \n    %% Preventive Warning Loop\n    B -.->|المتبقي <= 15 يوماً| J[\"إطلاق تنبيه وقائي للمدير الفني ومدير المختبر\"]:::alertStyle\n    J -.->|جدولة استباقية| G\n    \n    %% Style Decision node\n    style B fill:#0f172a,stroke:#3b82f6,stroke-width:1.5px,color:#93c5fd;\n```\n\n1. **الربط والترميز الفريد للأجهزة (Unique Equipment Identification):**\n   * يتم ترميز وتسجيل كل معدة وجهاز فحص في النظام (مثل مكبس كسر المكعبات، جهاز الكثافة الحقلية، أفران التجفيف) بمعرف فريد ورقابة معايرة دورية.\n\n2. **الرقابة الذكية على الإدخال (Proactive Input Lockout):**\n   * عند قيام فني المختبر بفتح شيت الاختبارات لإدخال نتائج تكسير المكعبات أو الدمك، يطالبه النظام باختيار الجهاز المستخدم من قائمة منسدلة.\n   * يقوم النظام بفحص حالة صلاحية المعايرة للجهاز المختار في الخلفية. إذا كانت حالة الجهاز \"غير معاير\" أو منتهي الصلاحية، يتم حظر عملية حفظ النتائج برمجياً وإظهار تنبيه: \"يمنع استخدام هذا الجهاز لانتهاء فترة المعايرة المعتمدة\".\n\n3. **جدولة وتنبيهات المعايرة والصيانة (Calibration Scheduling & Warnings):**\n   * يقوم موديول المعايرة بإرسال إشعارات وتنبيهات دورية تلقائية للمدير الفني ومدير المختبر قبل **15 يوماً** من انتهاء صلاحية معايرة أي أصل أو جهاز معملي لجدولة المعايرة وتفادي توقف العمل الفني.\n"
+    },
+    {
+        "name": "05. التكامل والامتثال والمعايير الأمنية",
+        "filename": "05_Integrations_Compliance_and_Security.md",
+        "content": "# المخطط الفني والتجاري لنظام رامسسكو (Ramssko Lab ERP/LIMS)\n## الجزء الخامس: التكامل والامتثال والمعايير الأمنية\n**الملف:** `05_Integrations_Compliance_and_Security.md`\n\n---\n\n### 1. الامتثال لمعايير الجودة الدولية (ISO/IEC 17025 Compliance)\n\nيلتزم النظام برمجياً بكافة متطلبات المواصفة الدولية **ISO 17025** لضمان كفاءة مختبر الفحص والمعايرة ومصداقية النتائج المصدرة للعملاء، ويتم ذلك من خلال الآليات التالية:\n\n#### أ. تدفق الاعتماد الثنائي للمكعبات والتربة (Maker-Checker Workflow):\n* لا يمكن لأي نتيجة اختبار فني (مثل كسر خرسانة، دمك تربة، كثافة حقلية) أن تعتمد في التقرير النهائي بمدخل فردي.\n* **صانع القرار (Maker):** يقوم فني المختبر بإجراء الاختبار الفعلي وإدخال القراءات والأوزان والقياسات الخام في شاشة \"شيت الاختبارات\".\n* **المراجع الفني (Checker):** يقوم المهندس المدني الجيوتقني أو المراجع الفني بفحص القراءات ومطابقتها للتأكد من خلوها من الأخطاء الحسابية والتحقق من كود الاختبار المعتمد (مثل ASTM D1557).\n* **الاعتماد الهندسي (Approver):** يقوم المدير الفني للمختبر باعتماد التقرير نهائياً ووضع توقيعه الهندسي، مما يسمح بتحديث حالة المعاملة.\n\n```mermaid\nflowchart TD\n    classDef stepStyle fill:#eff6ff,stroke:#2563eb,stroke-width:2px,color:#1e40af;\n    classDef decisionStyle fill:#fffbeb,stroke:#d97706,stroke-width:2px,color:#92400e;\n    classDef doneStyle fill:#ecfdf5,stroke:#10b981,stroke-width:2px,color:#065f46;\n\n    Start([بدء إدخال قراءات الاختبار الفني]) --> Maker[فني المختبر - Maker:\\nتسجيل الأوزان والأبعاد والنتائج الخام في شيت الاختبارات]:::stepStyle\n    Maker --> SystemCheck{تطابق معايير النجاح؟\\nالدمك > 95%\\nالخرسانة >= 75%}:::decisionStyle\n    \n    SystemCheck -- نعم --> Checker[المراجع الفني - Checker:\\nتدقيق البيانات ومراجعة الأكواد الكودية والأجهزة المستخدمة]:::stepStyle\n    SystemCheck -- لا --> QualityAlert[إطلاق تنبيه جودة تلقائي بالنظام\\nوتسجيل انحراف عدم مطابقة]:::stepStyle\n    \n    QualityAlert --> ReTestCmd[إصدار تكليف فوري لإعادة الاختبار]:::stepStyle\n    ReTestCmd --> Maker\n    \n    Checker --> VerifyDecision{هل البيانات والمراجعة\\nصحيحة؟}:::decisionStyle\n    VerifyDecision -- نعم --> TechDirApprove[المدير الفني - Approver:\\nالمصادقة الهندسية والاعتماد الرقمي]:::stepStyle\n    VerifyDecision -- لا --> RejectCorrection[رفض المعاملة وتوجيهها للتعديل\\nمع إجبارية تدوين السبب]:::stepStyle\n    \n    RejectCorrection --> AuditLog[تسجيل التعديل في سجل التدقيق الموثق]:::stepStyle\n    AuditLog --> Maker\n    \n    TechDirApprove --> Finish([تحديث التذكرة لـ معتمدة\\nوجاهزة للتصدير]):::doneStyle\n```\n\n#### ب. إدارة ومعايرة الأجهزة الحيوية:\n* يرتبط موديول المختبر بموديول المعايرة (Sub 7). في حال انتهاء صلاحية معايرة أي جهاز (مثل مكبس كسر المكعبات الهيدروليكي، أو ميزان الكثافة الحقلية)، يتم قفل إمكانية اختياره أو إدخال نتائج فحص مرتبطة به في شيت الاختبارات تلقائياً.\n* يتم تسجيل رقم الجهاز التسلسلي (Machine ID) وتاريخ آخر معايرة مع كل نتيجة اختبار لحفظ سلسلة التتبع الفني.\n\n#### ج. سجل تدقيق قراءات الفحوصات (Test Results Audit Trail):\n* يُمنع تعديل أي نتيجة اختبار بعد حفظها الأولي إلا بصلاحية خاصة يملكها المراجع الفني أو المدير الفني.\n* في حال التعديل، يُلزم النظام المستخدم بكتابة **سبب التعديل** بالتفصيل، ويقوم النظام بتوثيق السجل في جدول التدقيق كالتالي:\n  - معرف المستخدم القائم بالتعديل.\n  - الطابع الزمني الدقيق للتعديل (Timestamp).\n  - معرف الجهاز والمشروع والجسّة/العينة المعنية.\n  - القيمة القديمة (Old Value) والقيمة الجديدة (New Value).\n  - السبب النصي المدخل للتعديل.\n\n---\n\n### 2. متطلبات الربط الحكومي الضريبي (ZATCA E-Invoicing)\n\nيتكامل موديول المالية ودفتر الأستاذ العام (Sub 10) بشكل كامل مع المنصة الحكومية لهيئة الزكاة والضريبة والجمارك (ZATCA) في المملكة العربية السعودية للامتثال لمتطلبات المرحلة الثانية (الربط والتكامل)، وفق المحددات التشغيلية التالية:\n\n```mermaid\nsequenceDiagram\n    autonumber\n    participant Fin as موديول المالية والـ GL (Sub 10)\n    participant ZATCA as منصة فاتورة (ZATCA API)\n    participant Microtek as نظام Microtek المالي\n\n    Note over Fin: إتمام السداد أو استحقاق الفاتورة النهائية\n    Fin->>Fin: توليد ملف XML للفاتورة متوافق مع معيار UBL 2.1\n    Fin->>Fin: حساب التوقيع الرقمي (Cryptographic Stamp/Hash) للفاتورة\n    Fin->>Fin: توليد رمز الاستجابة السريعة (QR Code) المشفّر Base64\n    Fin->>ZATCA: إرسال طلب الربط والمصادقة (API Post Request)\n    \n    alt الفاتورة مبسطة (B2C)\n        ZATCA-->>Fin: تأكيد الاستلام وتسجيل الفاتورة بنجاح (Reporting)\n    else الفاتورة ضريبية قياسية (B2B)\n        ZATCA-->>Fin: المصادقة والتوقيع الإلكتروني الحكومي (Clearance)\n    end\n    \n    Fin->>Fin: حفظ الفاتورة بصيغة PDF/A-3 مع ملف XML المدمج\n    Fin->>Microtek: مزامنة الحركة المالية وقيد اليومية تلقائياً\n```\n\n#### المتطلبات البرمجية للتكامل مع ZATCA:\n1. **توليد الفاتورة بصيغة XML (UBL 2.1):**\n   * يجب أن يقوم النظام ببناء الفاتورة بصيغة XML متوافقة بالكامل مع اشتراطات الهيئة، متضمنةً الحقول الإلزامية: الرقم الضريبي للمختبر (Ramssko VAT Number)، العنوان الوطني، الرقم الضريبي للعميل (في فواتير B2B)، وتفاصيل البنود والخدمات (فحص تربة، كسر خرسانة).\n2. **التوقيع الرقمي وهش الفاتورة (Cryptographic Hash & Serial):**\n   * يقوم النظام باحتساب الهش (Hash) لكل فاتورة وربطه بهش الفاتورة السابقة (Invoice Chain) لضمان عدم التلاعب بالفواتير التسلسلية.\n   * إدراج رمز تعريف الفاتورة الفريد عالمياً (UUID) وعداد الفواتير المتسلسل بالنظام.\n3. **ترميز رمز الاستجابة السريعة (QR Code Encryption):**\n   * توليد رمز QR مشفر بصيغة Base64 يحتوي على خمسة حقول إلزامية: اسم المورد، الرقم الضريبي للمورد، تاريخ ووقت الفاتورة، إجمالي قيمة الفاتورة شاملة الضريبة، وإجمالي قيمة ضريبة القيمة المضافة (15%).\n4. **تكامل واجهة التطبيق (API Integration):**\n   * إرسال الفواتير بشكل لحظي عبر بروتوكول HTTPS إلى خوادم الهيئة للحصول على الترخيص والمصادقة (B2B Clearance) أو الإبلاغ (B2C Reporting).\n\n---\n\n### 3. التكامل المالي مع برنامج Microtek\n\nيعمل نظام رامسسكو كمنظومة مونوث نمطي تدير الحسابات التشغيلية والمبيعات بكفاءة، ولكنه يعتمد على برنامج **Microtek** المالي الخارجي كدفتر الأستاذ العام الختامي والمطابقة المحاسبية الكبرى.\n\n#### نقاط التكامل والمزامنة مع Microtek:\n* **مزامنة العملاء وعروض الأسعار:** فور قبول العميل لعرض السعر رسمياً وتوقيعه، يتم إرسال بيانات العميل والاتصال إلى برنامج Microtek لإنشاء حساب عميل مرادف وتجنب التكرار.\n* **مزامنة سندات القبض والدفعة المقدمة (50%):** عند اعتماد محاسب المبيعات للتحويل البنكي أو السداد الإلكتروني لدفعة التأمين المقدمة، يرسل النظام حركة مالية لقيد القبض إلى Microtek لتسجيل الدفعة الدائنة بحساب العميل.\n* **مزامنة الفواتير النهائية والضرائب:** فور استلام الفاتورة النهائية المعتمدة من ZATCA، يتم دفع تفاصيل الفاتورة وقيمة ضريبة القيمة المضافة (15%) إلكترونياً إلى Microtek لتوليد قيد اليومية العام المباشر:\n  - `من ح/ البنك أو ح/ ذمم العملاء`\n  - `إلى ح/ إيرادات تشغيل المختبر`\n  - `إلى ح/ ضريبة القيمة المضافة المستحقة`\n\n---\n\n### 4. التدقيق الأمني والصلاحيات (Security & System Audit)\n\n#### أ. التحكم بالوصول المستند للأدوار (RBAC Rules):\nيقيد النظام الوصول للواجهات والعمليات البرمجية بناءً على الدور الوظيفي للمستخدم بشكل صارم وصارم جداً:\n* **فني الحفر (Driller):** لا يملك صلاحية الوصول للوحة التحكم بالمتصفح؛ يقتصر وصوله على تطبيق الهاتف المحمول للقيام بـ (تأكيد استلام المركبة، إثبات الإحداثيات والصور للجسات الميدانية).\n* **فني المختبر (Lab Tech):** يملك فقط صلاحية عرض وإدخال القراءات في \"شيت الاختبارات\" للعينات المحولة له، ويُمنع من تعديل أي اختبار معتمد أو الاطلاع على الأسعار المالية للجسات.\n* **المحاسب (Accountant):** يملك الصلاحيات المالية (الفواتير، سندات القبض، الخصومات المعتمدة، الربط مع Microtek و ZATCA) ويُمنع تماماً من تعديل أي نتيجة اختبار فنية.\n* **المدير الفني والجيوتقني (Technical Director):** صلاحيات المراجعة والاعتماد الفني وإصدار التوصيات وتنزيل التقارير النهائية وتعديل القراءات الفنية المسجلة بالخطأ (مع التوثيق بسجل التدقيق).\n\n#### ب. سجل تدقيق تعديل حالات المعاملات والعمليات المالية (Mutation Audit Log):\nيسجل النظام تلقائياً أي تغيير في حالات البيانات الحيوية داخل جداول قاعدة البيانات لضمان الموثوقية الكاملة:\n\n```mermaid\nflowchart TD\n    classDef logStyle fill:#fffbeb,stroke:#d97706,stroke-width:2px,color:#92400e;\n    \n    Trigger[أي عملية تعديل للحالة أو العمليات المالية بالخلفية] --> AuditEngine[محرك سجل التدقيق الأمني الموحد]\n    \n    AuditEngine --> WriteLog1[(جدول سجل تعديلات التذاكر\\nTicket State Log)]:::logStyle\n    AuditEngine --> WriteLog2[(جدول تعديلات القراءات المعملية\\nLab Mutation Log)]:::logStyle\n    AuditEngine --> WriteLog3[(جدول الحركات والخصومات المالية\\nFinancial Audit Log)]:::logStyle\n    \n    WriteLog1 --> LogDetail1[يسجل: الكود القديم، الكود الجديد،\\nالمستخدم القائم بالتعديل، الطابع الزمني]\n    WriteLog2 --> LogDetail2[يسجل: القيمة القديمة، القيمة الجديدة،\\nرقم الجهاز المستخدم، سبب التعديل النصي]\n    WriteLog3 --> LogDetail3[يسجل: الخصم الإضافي، توقيع موافقة المدير العام،\\nمعرف المعاملة والعملية]\n```\n\n1. **سجل حالات التذاكر والعمليات (Ticket Mutation Log):**\n   * يوثق أي تحول لحالة التذكرة (مثل الانتقال من `معلقة` إلى `تحت التنفيذ`). يتم تسجيل معرف الموظف القائم بالإجراء، الطابع الزمني، الحالة السابقة، والحالة الجديدة.\n2. **سجل التعديلات والخصومات المالية (Financial Mutation Log):**\n   * يُمنع التلاعب بالقيم المالية للجسات أو تغيير التسعير الثابت للبلديات إلا باعتماد موثق.\n   * في حال تطبيق خصم خاص للعميل، يجب إدخال كود الموافقة المعتمد من المدير العام (أحمد فؤاد) أو المدير التنفيذي (محمود فؤاد)، ويسجل النظام تاريخ الموافقة والخصم الممنوح لضمان عدم وجود تلاعب مالي أو عمليات احتيال داخلي.\n"
+    },
+    {
+        "name": "06. تحليل الفجوات والأسئلة المفتوحة",
+        "filename": "06_Gap_Analysis_and_Open_Questions.md",
+        "content": "# المخطط الفني والتجاري لنظام رامسسكو (Ramssko Lab ERP/LIMS)\n## الجزء السادس: تحليل الفجوات والأسئلة المفتوحة\n**الملف:** `06_Gap_Analysis_and_Open_Questions.md`\n\n---\n\n### 1. تحليل الفجوات والعمليات المفقودة (Identified Gaps)\n\nأظهر التحليل المعمق للوثائق ومحاضر الاجتماعات الفنية وجود بعض الفجوات الإجرائية وحالات الحافة (Edge Cases) التي لم تشر إليها المستندات بالتفصيل، والتي يجب معالجتها برمجياً لضمان استقرار النظام:\n\n| الفجوة المكتشفة | الوصف والتبعات الفنية | المقترح المعماري للتغطية |\n| :--- | :--- | :--- |\n| **آلية التعامل مع فشل اختبار الخرسانة النهائي** | في حال عدم تحقيق عينات الخرسانة نسبة المقاومة المطلوبة (أقل من 75%) بعد 28 يوماً، لم تذكر المستندات الإجراء النظامي الفوري (هل يتم منع تصدير التقرير؟ هل يُخطر العميل تلقائياً؟). | يقترح النظام إطلاق تنبيه جودة فوري لـ (المدير الفني)، وتعليق إرسال التقرير، وفتح طلب تلقائي لاختبار إضافي (مطرقة شميدت أو كشط كور خرساني) مع إخطار الاستشاري. |\n| **تكاليف إعادة اختبارات التربة الفاشلة** | ذُكر أنه في حال فشل اختبار الدمك (< 95%) يتم إعادة الاختبار للتأكد. لكن لم يوضح السجل المالي هل يتم فوترة إعادة الاختبار وزيارة الموقع مجدداً أم تُحسب كخدمة مجانية بسبب قصور المقاول؟ | إضافة حقل مالي في أمر الشغل لتحديد جهة سداد تكلفة إعادة الاختبار (هل هي على المقاول/العميل أم مشمولة بالضمان التشغيلي للمشروع). |\n| **صلاحيات التعديل الميداني للجسات** | هل يُسمح للمهندس الجيولوجي أو فني الحفر في الموقع (عبر تطبيق الجوال) بزيادة عدد الجسات أو تغيير الأعماق إذا واجه طبقات صخرية صلبة غير متوقعة، أم يجب الحصول على اعتماد مالي أولاً؟ | يقترح النظام تجميد واجهة التطبيق الميداني في حال طلب زيادة عدد الجسات، وإرسال طلب اعتماد لحظي (Push Notification) لمدير التشغيل والمبيعات لتحديث الفاتورة وعرض السعر. |\n| **معالجة أعطال الحفارات ميدانياً** | لم تحدد السجلات كيفية معالجة توقف الحفر بسبب أعطال المعدات (Sub 7/8). هل يتم إعادة جدولة المعاملة وإحالتها لفريق حفر آخر تلقائياً في النظام؟ | دمج موديول الصيانة (Sub 7) مع جدولة التشغيل (Sub 1)، بحيث يتم نقل الأصل (الحفار المعطل) تلقائياً لحالة \"خارج الخدمة\" ويقوم النظام باقتراح أقرب حفار بديل متاح لإكمال العمل. |\n| **حدود صلاحيات الخصم المالي** | لم تذكر الوثائق نسب الخصم المسموح بها لمهندسي المبيعات أو المحاسبين دون الرجوع للإدارة العليا. | إدراج مصفوفة صلاحيات خصم آلية: مهندس المبيعات (0-5%)، مدير الحسابات (6-15%)، وما يتجاوز ذلك يتطلب توقيع رقمي معتمد من المدير العام أو التنفيذي. |\n| **حالة العمل دون اتصال بالإنترنت (Offline Mode)** | يواجه فنيو الحفر في المناطق النائية انقطاعاً في تغطية الإنترنت. كيف يتم حفظ قراءات الجسات والصور والإحداثيات اللحظية على تطبيق الجوال؟ | تفعيل خاصية التخزين المحلي المؤقت (Local SQLite Storage) على تطبيق الهاتف ليعمل بكامل وظائفه دون إنترنت، مع المزامنة التلقائية فور توفر الشبكة. |\n\n---\n\n### 2. التناقضات المكتشفة في مصادر البيانات (Source Contradictions)\n\nتم رصد بعض التناقضات بين وثيقة المتطلبات وملفات جداول البيانات (Excel) والتي تتطلب قراراً حاسماً من أصحاب الأعمال لتطبيق منطق البرمجة الصحيح:\n\n1. **حساب عدد الجسات (مساحة الأرض أم مساحة البناء؟):**\n   * **وثيقة المتطلبات:** تنص على أن تحديد عدد الجسات يتم بناءً على **مساحة الأرض الكلية** ونوع المشروع (مثال: مساحة 200-300 م² تتطلب 3 جسات).\n   * **جدول أسعار الجسات (Excel):** يحتوي على عمودين رئيسيين: الأول يسمى \"مساحة البناء\" والثاني \"عدد الجسات\". وفي الحقول الداخلية توجد معادلة تسير كالتالي: `مساحة البناء مقربة لاقرب 100 = مساحة الارض * 0.6` (معامل البناء 60%). ثم يتم استخدام هذه القيمة المقربة لتحديد عدد الجسات.\n   * **التناقض:** هل يعتمد النظام في واجهة إدخال البيانات على مساحة الأرض المدخلة ويقوم بحساب مساحة البناء تقديرياً (60%) ومن ثم تحديد الجسات؟ أم يعتمد على مساحة البناء الفعلية المدخلة مباشرة من العميل/المبيعات؟\n\n2. **قاعدة مساحة الجسات الدنيا:**\n   * **وثيقة المتطلبات:** تذكر أن المساحة بين 200 إلى 300 م² تتطلب 3 جسات كحد أدنى.\n   * **جدول أسعار الجسات (Excel):** يوضح أن المساحة **0 م²** تتطلب 3 جسات أيضاً، والمساحات حتى **800 م²** تتطلب 3 جسات.\n   * **التناقض:** لا توجد فئة تسعيرية أو فنية في الجدول تحدد جسات أقل من 3، مما يعني أن الحد الأدنى التشغيلي لجميع مساحات البناء الصغرى (من 0 إلى 800 م²) هو 3 جسات. يجب توحيد لغة الكود البرمجي لتعكس الجدول المالي.\n\n3. **رمز مرجع عرض السعر الفريد:**\n   * **وثيقة المتطلبات:** تعرض الرمز المرجعي لعرض السعر بالتنسيق الموثق التالي: `RAM-D-F-2606153`.\n   * **التناقض:** لم توضح الوثيقة المعنى الهيكلي للرقم `2606153`. هل يمثل التاريخ (`26/06/15`) متبوعاً برقم تسلسلي (`3`)؟ أم هو رقم عشوائي؟ لغرض أوتوماتيكية النظام، يجب وضع قاعدة ثابتة لتوليد المراجع (مثل: `RAM-D-F-[السنة][الشهر][اليوم][المسلسل]`).\n\n---\n\n### 3. أسئلة استيضاحية موجهة لأصحاب الأعمال (Clarification Questions)\n\nنورد أدناه الأسئلة الحرجة التي يجب طرحها على مسؤولي مختبر رامسسكو والمديرين (أحمد فؤاد، محمود فؤاد، عمار السباعي) للحصول على توضيحات رسمية قبل البدء في مرحلة التطوير البرمجي:\n\n| # | السؤال الموجه لأصحاب الأعمال | القسم المعني | الهدف من السؤال برمجياً |\n| :--- | :--- | :--- | :--- |\n| **1** | هل يقوم النظام بحساب عدد الجسات بناءً على **مساحة الأرض الكلية** التي يدخلها العميل ويطبق عليها نسبة البناء (60%) تلقائياً، أم يجب إدخال **مساحة البناء** كقيمة مستقلة وفعلية؟ | المبيعات / الإدارة الفنية | بناء خوارزمية التسعير التلقائي وحساب عدد الجسات بدقة في موديول CRM والـ Lobe. |\n| **2** | في حال فشل عينات الخرسانة (تكسير المكعبات بقوة أقل من 75%)، هل يجب على النظام **منع تصدير التقرير الفني** للعميل تلقائياً، أم يُصدر التقرير مع وسم الفشل باللون الأحمر؟ | إدارة المختبر / المدير الفني | تحديد حوكمة سير العمل وشروط الاعتماد وإرسال التقارير النهائية للعميل. |\n| **3** | هل يُسمح للعميل بسداد الدفعة المقدمة (50%) بعد معاينة الموقع وبدء التجهيز، أم يمنع النظام تماماً انتقال سيارات الحفر وإصدار أمر الشغل (WO) قبل التحقق المحاسبي من الدفعة؟ | الإدارة المالية والتشغيل | ضبط شروط انتقال التذاكر من الحالة `معلقة` إلى `تحت التنفيذ`. |\n| **4** | ما هي طبيعة دور \"فني مختبر (مشتريات عامة/أدوات مختبر)\" وفني الحفار للمشتريات؟ هل هم موظفون إداريون يملكون صلاحية الشراء، أم فنيون تشغيليون يرفعون طلبات الصرف والمشتريات؟ | الموارد البشرية والمخازن | تحديد أدوار RBAC وصلاحيات موديول المخزون والمشتريات (Sub 9). |\n| **5** | هل الربط المالي مع برنامج **Microtek** مطلوب أن يكون ثنائي الاتجاه (مزامنة فورية متبادلة)، أم هو ربط أحادي الاتجاه يقوم بدفع القيود والفواتير من رامسسكو إلى Microtek فقط؟ | الإدارة المالية والحسابات | تحديد متطلبات الربط وهيكلة خادم الـ Webhook وقنوات نقل البيانات. |\n| **6** | في حال انقطاع خادم هيئة الزكاة والضريبة (ZATCA) أو تعطل الإنترنت، هل يتم تخزين الفواتير محلياً وإرسالها لاحقاً (Offline Queue)، أم يتم منع إصدار الفواتير تماماً لمنع المخالفات؟ | الإدارة المالية وتقنية المعلومات | تصميم بنية المعالجة للأخطاء وتكامل واجهات برمجة التطبيقات الحكومية. |\n| **7** | ما هي نسب الخصم المعتمدة رسمياً لكل دور وظيفي (مهندس مبيعات، محاسب، مدير مالي) وما هي آلية إدخال رمز الموافقة للمدير العام بالنظام؟ | الإدارة المالية والإدارة العليا | برمجة منطق الحماية والتحقق المالي داخل موديول الفوترة والـ GL. |\n"
+    }
+]
+                );
+
+                const currentIndex = ref(0);
+                const isDashboard = ref(true);
+                const loading = ref(false);
+                const renderedContent = ref("");
+                const searchQuery = ref("");
+                const isDark = ref(true);
+
+                // دالة لتصفية الملفات حسب استعلام البحث
+                const filteredFiles = computed(() => {
+                    const query = searchQuery.value.trim().toLowerCase();
+                    // نقوم بحفظ المؤشر الأصلي لكل ملف
+                    const mappedFiles = files.value.map((f, idx) => ({ ...f, originalIndex: idx }));
+                    if (!query) return mappedFiles;
+                    return mappedFiles.filter(f => 
+                        f.name.toLowerCase().includes(query) || 
+                        f.content.toLowerCase().includes(query) ||
+                        f.filename.toLowerCase().includes(query)
+                    );
+                });
+
+                const selectFile = (originalIndex) => {
+                    loading.value = true;
+                    isDashboard.value = false;
+                    currentIndex.value = originalIndex;
+                    
+                    nextTick(() => {
+                        updateRender();
+                        loading.value = false;
+                    });
+                };
+
+                const selectDashboard = () => {
+                    isDashboard.value = true;
+                };
+
+                const currentFile = computed(() => files.value[currentIndex.value]);
+
+                const updateRender = () => {
+                    let rawHtml = marked.parse(currentFile.value.content || "");
+                    
+                    // تحويل كود المرميد في المارك داون من pre-code إلى div
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = rawHtml;
+                    
+                    const codeBlocks = tempDiv.querySelectorAll('pre code.language-mermaid');
+                    codeBlocks.forEach((codeBlock, idx) => {
+                        const pre = codeBlock.parentElement;
+                        const container = document.createElement('div');
+                        container.className = 'mermaid-wrapper relative my-8 group';
+                        
+                        // فك تشفير المحتوى النصي للمرميد
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(codeBlock.innerText, 'text/html');
+                        const mermaidCode = doc.documentElement.textContent;
+                        
+                        container.innerHTML = `
+                            <div class="absolute left-3 top-3 flex space-x-2 space-x-reverse opacity-0 group-hover:opacity-100 transition-all duration-200 z-10">
+                                <button onclick="window.expandDiagram(this)" class="p-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-white text-xs border border-slate-700 shadow-md backdrop-blur-sm flex items-center space-x-1 space-x-reverse" title="توسيع المخطط للكامل">
+                                    <span>🔍</span>
+                                    <span>توسيع</span>
+                                </button>
+                                <button onclick="window.downloadDiagram(this)" class="p-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-white text-xs border border-slate-700 shadow-md backdrop-blur-sm flex items-center space-x-1 space-x-reverse" title="تحميل المخطط كصورة">
+                                    <span>💾</span>
+                                    <span>تحميل</span>
+                                </button>
+                            </div>
+                            <div class="mermaid p-6 bg-white dark:bg-slate-900 rounded-2xl shadow-md border border-slate-100 dark:border-slate-800/80 flex justify-center overflow-x-auto">
+                                ${mermaidCode}
+                            </div>
+                        `;
+                        
+                        pre.parentNode.replaceChild(container, pre);
+                    });
+                    
+                    renderedContent.value = tempDiv.innerHTML;
+                    
+                    nextTick(() => {
+                        try {
+                            mermaid.initialize({
+                                startOnLoad: false,
+                                theme: isDark.value ? 'dark' : 'default',
+                                securityLevel: 'loose',
+                                fontFamily: 'Cairo, sans-serif',
+                                themeVariables: {
+                                    fontFamily: 'Cairo, sans-serif',
+                                    primaryColor: isDark.value ? '#1e293b' : '#f8fafc',
+                                    primaryTextColor: isDark.value ? '#ffffff' : '#0b0f19',
+                                    primaryBorderColor: isDark.value ? '#38bdf8' : '#2563eb',
+                                    lineColor: isDark.value ? '#38bdf8' : '#2563eb',
+                                    secondaryColor: isDark.value ? '#0f172a' : '#f1f5f9',
+                                    tertiaryColor: isDark.value ? '#1e293b' : '#f8fafc',
+                                    actorBkg: isDark.value ? '#1e293b' : '#eff6ff',
+                                    actorBorder: isDark.value ? '#38bdf8' : '#2563eb',
+                                    actorTextColor: isDark.value ? '#ffffff' : '#1e3a8a',
+                                    actorLineColor: isDark.value ? '#38bdf8' : '#2563eb',
+                                    signalColor: isDark.value ? '#38bdf8' : '#2563eb',
+                                    signalTextColor: isDark.value ? '#f8fafc' : '#0b0f19',
+                                    labelBoxBkgColor: isDark.value ? '#090d16' : '#ffffff',
+                                    labelBoxBorderColor: isDark.value ? '#1e293b' : '#cbd5e1',
+                                    labelTextColor: isDark.value ? '#38bdf8' : '#1e3a8a',
+                                    loopTextColor: isDark.value ? '#ffffff' : '#0b0f19',
+                                    noteBkgColor: isDark.value ? '#172554' : '#fef3c7',
+                                    noteBorderColor: isDark.value ? '#3b82f6' : '#d97706',
+                                    noteTextColor: isDark.value ? '#e0effe' : '#78350f'
+                                }
+                            });
+                            mermaid.run();
+                        } catch (e) {
+                            console.error("Mermaid Render Error:", e);
+                        }
+                    });
+                };
+
+                const toggleTheme = () => {
+                    isDark.value = !isDark.value;
+                    const html = document.documentElement;
+                    if (isDark.value) {
+                        html.classList.add('dark');
+                    } else {
+                        html.classList.remove('dark');
+                    }
+                    if (!isDashboard.value) {
+                        updateRender();
+                    }
+                };
+
+                onMounted(() => {
+                    // تهيئة المظهر المظلم افتراضياً
+                    document.documentElement.classList.add('dark');
+                });
+
+                return {
+                    files,
+                    currentIndex,
+                    currentFile,
+                    isDashboard,
+                    renderedContent,
+                    searchQuery,
+                    filteredFiles,
+                    selectFile,
+                    selectDashboard,
+                    loading,
+                    isDark,
+                    toggleTheme
+                };
+            }
+        }).mount('#app');
+
+        // دوال التحكم بالمرميد وسيناريوهات التكبير والتحميل في النطاق العالمي
+        let currentZoom = 1;
+        
+        window.expandDiagram = function(button) {
+            const wrapper = button.closest('.mermaid-wrapper');
+            const svg = wrapper.querySelector('.mermaid svg');
+            if (!svg) return;
+            
+            const modal = document.getElementById('diagram-modal');
+            const modalContent = document.getElementById('modal-content');
+            
+            // استنساخ عنصر الـ SVG ووضعه في المودال
+            modalContent.innerHTML = '';
+            const clonedSvg = svg.cloneNode(true);
+            clonedSvg.style.width = '100%';
+            clonedSvg.style.height = '100%';
+            clonedSvg.style.maxWidth = 'none';
+            clonedSvg.style.maxHeight = 'none';
+            clonedSvg.id = 'modal-active-svg';
+            modalContent.appendChild(clonedSvg);
+            
+            currentZoom = 1;
+            updateModalZoom();
+            
+            modal.classList.remove('hidden');
+        };
+
+        window.closeDiagramModal = function() {
+            const modal = document.getElementById('diagram-modal');
+            modal.classList.add('hidden');
+        };
+
+        window.zoomIn = function() {
+            currentZoom += 0.2;
+            updateModalZoom();
+        };
+
+        window.zoomOut = function() {
+            if (currentZoom > 0.4) {
+                currentZoom -= 0.2;
+                updateModalZoom();
+            }
+        };
+
+        window.resetZoom = function() {
+            currentZoom = 1;
+            updateModalZoom();
+        };
+
+        function updateModalZoom() {
+            const svg = document.getElementById('modal-active-svg');
+            if (svg) {
+                svg.style.transform = `scale(${currentZoom})`;
+                svg.style.transformOrigin = 'center center';
+                svg.style.transition = 'transform 0.2s ease-in-out';
+            }
+        }
+
+        window.downloadDiagram = function(button) {
+            const wrapper = button.closest('.mermaid-wrapper');
+            const svg = wrapper.querySelector('.mermaid svg');
+            if (!svg) return;
+            
+            // تحويل SVG لنص XML وتنزيله كمستند
+            const serializer = new XMLSerializer();
+            let source = serializer.serializeToString(svg);
+            
+            // إضافة مساحات التسمية لضمان عمل الملف منفرداً
+            if(!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)){
+                source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+            }
+            if(!source.match(/^<svg[^>]+xmlns:xlink="http:\/\/www\.w3\.org\/1999\/xlink"/)){
+                source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/1999/xlink"');
+            }
+            
+            source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+            
+            const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
+            
+            const downloadLink = document.createElement("a");
+            downloadLink.href = url;
+            downloadLink.download = "ramssko_diagram_" + Date.now() + ".svg";
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        };
+    </script>
+</body>
+</html>
